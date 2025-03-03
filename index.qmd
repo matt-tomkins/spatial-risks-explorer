@@ -1,0 +1,99 @@
+---
+project: website
+format: html
+---
+
+Anthropogenic climate change is one of the principal threats facing humanity (1). While climate change impacts vary in form and intensity across the globe (2), urban areas are particularly vulnerable due to the high and growing concentration of human assets and activities (3, 4), comprising ~4.5 billion individuals in 2022 (5). Impacts associated with rising average temperatures, as well as an increase in the frequency and intensity of extreme weather events, such as heatwaves (6), also have a disproportionate impact in urban areas due to the urban heat island (UHI) effect, in which cities are typically warmer than surrounding rural areas due to the effect of building materials and morphology on energy exchange and airflow (7, 8). In combination, these trends have important consequences for morbidity and mortality in urban areas (9).
+
+> Explore Manchester's canal network below, and the buildings within 100 m. 
+
+```{python}
+#| echo: false
+
+# Source: https://www.riannek.de/2022/gpx-to-geopandas/
+import folium
+import os
+import json
+from geopandas import read_file, GeoDataFrame
+from pandas import concat
+from folium.plugins import GroupedLayerControl
+
+# Load canals data
+with open('./data/manchester-canals-4326.geojson', 'r') as f:
+    data = json.load(f)
+
+# Load buildings data
+with open('./data/manchester-buildings-4326.geojson', 'r') as f:
+    buildings = json.load(f)
+
+# Extract data and init dict
+extract = data['features']
+building_extract = buildings['features']
+new_dict = {}
+
+# Iterate and add, key is canal ID
+for e in extract:
+    new_dict[e['properties']['code_id']] = {'layer' : e['properties']['layer'],
+                                            'geometry' : e['geometry']}
+    
+# Extract canal names
+names = set([x['layer'] for x in new_dict.values()])
+
+# Create map
+m = folium.Map(location=(53.472648,-2.241951), zoom_start=11, 
+                tiles="Cartodb Positron")
+
+# Iterate through each canal
+for n in names:
+
+    # Filter based on canal names
+    filtered = [geo for geo in extract if geo['properties']['layer'] == n]
+
+    # Filter buildings based on canal names
+    filtered_buildings = [geo for geo in building_extract if geo['properties']['layer'] == n]
+
+    # Convert to GeoJSON feature collection format
+    filtered_dict = {
+    "type": "FeatureCollection",
+    "name": "manchester-canals-4326",
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": filtered}
+
+    # As above, for building
+    building_dict = {
+    "type": "FeatureCollection",
+    "name": "manchester-buildings-4326",
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": filtered_buildings}
+
+    # Add canals
+    c = folium.GeoJson(filtered_dict, style_function=lambda feature: {
+    "fillColor": "#72b4f9",
+    "color": "#2b5d93"}, name=n,
+    zoom_on_click=True)
+
+    # Add buildings
+    b = folium.GeoJson(building_dict, style_function=lambda feature: {
+    "fillColor": "#b6b6b6",
+    "color": "#505050",
+    "weight": 1}, name=f"{n} buildings",
+    zoom_on_click=True)
+
+    # Create and populate group
+    current_group = folium.FeatureGroup(name=n, show=False)
+    current_group.add_child(c)
+    current_group.add_child(b)
+
+    # Add to map
+    current_group.add_to(m)
+
+# Fit to map content
+folium.FitOverlays().add_to(m)
+
+# Add layer control
+folium.LayerControl().add_to(m)
+
+# Show map
+m
+
+```

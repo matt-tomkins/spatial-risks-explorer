@@ -1,0 +1,65 @@
+---
+title: "Temperature"
+---
+
+Anthropogenic climate change is one of the principal threats facing humanity (1). While climate change impacts vary in form and intensity across the globe (2), urban areas are particularly vulnerable due to the high and growing concentration of human assets and activities (3, 4), comprising ~4.5 billion individuals in 2022 (5). Impacts associated with rising average temperatures, as well as an increase in the frequency and intensity of extreme weather events, such as heatwaves (6), also have a disproportionate impact in urban areas due to the urban heat island (UHI) effect, in which cities are typically warmer than surrounding rural areas due to the effect of building materials and morphology on energy exchange and airflow (7, 8). In combination, these trends have important consequences for morbidity and mortality in urban areas (9).
+
+> Explore the effects of adding shading to water temperature (test).
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+
+# Load canals data
+with open('./data/model-output-excluding-rc_9.json', 'r') as f:
+    excluding_data = json.load(f)
+
+# Load buildings data
+with open('./data/model-output-including-rc_9.json', 'r') as f:
+    including_data = json.load(f)
+
+# Extract water temperature values, excluding | including shading effects
+excluding_water = [x['surface_water_k'] - 273.15 for x in excluding_data.values()]
+including_water = [x['surface_water_k'] - 273.15 for x in including_data.values()]
+
+ # Extract water temperature values, excluding | including shading effects
+excluding_concrete = [x['surface_concrete_k'] - 273.15 for x in excluding_data.values()]
+including_concrete = [x['surface_concrete_k'] - 273.15 for x in including_data.values()]
+
+# Extract differences
+diff_water = [e - i  for e, i in zip(excluding_water, including_water)]  
+diff_concrete = [e - i  for e, i in zip(excluding_concrete, including_concrete)]  
+
+# List of dict keys (unix), convert to datetime format
+dt = list(excluding_data.keys())
+dt_datetime = [datetime.utcfromtimestamp(int(x)) for x in dt]
+
+# Create a Plotly figure
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=dt_datetime, y=excluding_water, mode='lines', 
+line_color = "#FFB16F", opacity=0.75, name='Excluding shading'))
+fig.add_trace(go.Scatter(x=dt_datetime, y=including_water, mode='lines', 
+line_color = "#707070", opacity=0.75, visible='legendonly', name='Including shading'))
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Temperature (°C)", 
+    legend_title="Legend",
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+
+# Save the figure as an HTML file
+fig.write_html("./images/shading_effects.html")
+
+# Optionally, display the plot inline
+#fig.show()
+
+```
+
+<iframe src="./images/shading_effects.html" width="100%" height="600px"></iframe>
+
+> How has adding shading to the environment influenced the water temperature? 
