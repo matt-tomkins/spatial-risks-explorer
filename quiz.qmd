@@ -1,0 +1,88 @@
+---
+title: "Quiz"
+---
+
+## General Knowledge Quiz
+
+<p>Answer the following questions:</p>
+
+<div id="quiz-container">
+
+  <!-- Question 1 -->
+  <p>1. What effect do canals have on daytime temperatures?</p>
+  <button onclick="checkAnswer('Cooling', 'correct', 1)">Cooling</button>
+  <button onclick="checkAnswer('No effect', 'incorrect', 1)">No effect</button>
+  <button onclick="checkAnswer('Warming', 'incorrect', 1)">Warming</button>
+  <div id="feedback-1"></div>
+
+  <!-- Question 2 -->
+  <p>2. What effect do canals have on nighttime temperatures?</p>
+  <button onclick="checkAnswer('Cooling', 'incorrect', 2)">Cooling</button>
+  <button onclick="checkAnswer('No effect', 'incorrect', 2)">No effect</button>
+  <button onclick="checkAnswer('Warming', 'correct', 2)">Warming</button>
+  <div id="feedback-2"></div>
+
+  <!-- Question 3 -->
+  <p>3. Which season typically sees the greatest daytime effects on temperature?</p>
+  <button onclick="checkAnswer('Winter', 'incorrect', 3)">Winter</button>
+  <button onclick="checkAnswer('Spring', 'correct', 3)">Spring</button>
+  <button onclick="checkAnswer('Summer', 'incorrect', 3)">Summer</button>
+  <button onclick="checkAnswer('Autumn', 'incorrect', 3)">Autumn</button>
+  <div id="feedback-3"></div>
+
+  <!-- Question 4 -->
+  <p>4. Which season typically sees the greatest nighttime effects on temperature?</p>
+  <button onclick="checkAnswer('Winter', 'incorrect', 4)">Winter</button>
+  <button onclick="checkAnswer('Spring', 'incorrect', 4)">Spring</button>
+  <button onclick="checkAnswer('Summer', 'correct', 4)">Summer</button>
+  <button onclick="checkAnswer('Autumn', 'incorrect', 4)">Autumn</button>
+  <div id="feedback-4"></div>
+
+  <!-- Question 5 -->
+  <p>5. How does increasing shading influence the effect of canals on air temperatures? </p>
+  <button onclick="checkAnswer('Increased cooling', 'incorrect', 5)">Increased cooling</button>
+  <button onclick="checkAnswer('No effect', 'incorrect', 5)">No effect</button>
+  <button onclick="checkAnswer('Reduced cooling', 'correct', 5)">Reduced cooling</button>
+  <div id="feedback-5"></div>
+
+  <!-- Question 6 -->
+  <p>6. How does increasing canal area influence the effect of canals on air temperatures? </p>
+  <button onclick="checkAnswer('Increased cooling', 'correct', 6)">Increased cooling</button>
+  <button onclick="checkAnswer('No effect', 'incorrect', 6)">No effect</button>
+  <button onclick="checkAnswer('Reduced cooling', 'incorrect', 6)">Reduced cooling</button>
+  <div id="feedback-6"></div>
+
+</div>
+
+<script>
+  // Function to check answer and provide feedback
+  function checkAnswer(answer, status, questionNumber) {
+    const feedbackElement = document.getElementById('feedback-' + questionNumber);
+    const buttons = event.target.parentElement.querySelectorAll('button');
+
+    if (status === 'correct') {
+      alert('Correct answer!');
+      feedbackElement.innerHTML = 'You got it right!';
+      // Disable the buttons once the correct answer is selected
+      buttons.forEach(button => button.disabled = true);
+    } else {
+      alert('Incorrect, try again!');
+      feedbackElement.innerHTML = 'Sorry, that\'s incorrect. Try again!';
+      // Keep the buttons visible for another attempt
+      buttons.forEach(button => button.disabled = false);
+    }
+  }
+</script>
+
+## A little bit more? 
+
+If you've been through the practical and want to explore some of this further, one thing we might to reflect on is the accuracy of our shading calculations. In our model, we use an existing package called [pybdshadow](https://pybdshadow.readthedocs.io/en/latest/index.html), designed specifically for generating building shadows, and base our calculations based on building geometries (footprints, heights) from the Ordnance Survey [MasterMap Topography layer](https://www.ordnancesurvey.co.uk/products/os-mastermap-topography-layer). 
+
+To illustrate the typical outputs, you can download the canal geometry for one feature of the Ashton Canal (`ac1_6`), the nearby building geometries, and the shadows produced at a specific datetime (`2022-01-01 09:45:00`). [Note: shadows are only produced for buildings in the solar direction, for computational ease]
+
+
+
+Here's the ShadeApp output: https://shademap.app/@53.48025,-2.22222,16.00077z,1735724716321t,0b,0p,0m!1735719966854!1735747267074#
+Here's the suncalc output: https://www.suncalc.org/#/53.4794,-2.2221,17/2022.01.01/09:45/27.5/3
+
+

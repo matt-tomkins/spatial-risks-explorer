@@ -3,7 +3,7 @@ project: website
 format: html
 ---
 
-Anthropogenic climate change is one of the principal threats facing humanity (1). While climate change impacts vary in form and intensity across the globe (2), urban areas are particularly vulnerable due to the high and growing concentration of human assets and activities (3, 4), comprising ~4.5 billion individuals in 2022 (5). Impacts associated with rising average temperatures, as well as an increase in the frequency and intensity of extreme weather events, such as heatwaves (6), also have a disproportionate impact in urban areas due to the urban heat island (UHI) effect, in which cities are typically warmer than surrounding rural areas due to the effect of building materials and morphology on energy exchange and airflow (7, 8). In combination, these trends have important consequences for morbidity and mortality in urban areas (9).
+Introductory text, describing the overall context. 
 
 > Explore Manchester's canal network below, and the buildings within 100 m. 
 
@@ -97,3 +97,8 @@ folium.LayerControl().add_to(m)
 m
 
 ```
+
+
+In today's practical, we're going to explore the model, considering its structure, [validation](model.qmd) and [initial results](results.qmd). We'll also explore the sensitivity of the model to changing inputs, including the degree of [shading](shading.qmd) and [canal area](area.qmd), and model performance under [changing climate](temperature.qmd).
+
+To finish, there is a short formative [quiz](quiz.qmd) to test your knowledge.

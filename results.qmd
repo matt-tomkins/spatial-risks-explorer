@@ -1,0 +1,297 @@
+---
+title: "Results"
+---
+
+## Water temperature 
+Plot of water temperature results (including shading)
+
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+
+# Load full results, including shading
+with open('./data/rc_9_including_0.15_2238_0.85.json', 'r') as f:
+    including_data = json.load(f)
+
+# Example data
+with open('./data/example-weather-data.json', 'r') as c:
+    climate = json.load(c)
+
+# Extract water temperature values
+temp = [x['air_temperature'] - 273.15 for x in climate.values()]
+
+# Extract water temperature values
+including_water = [x['surface_water_k'] - 273.15 for x in including_data.values()]
+including_concrete = [x['surface_concrete_k'] - 273.15 for x in including_data.values()]
+
+# List of dict keys (unix), convert to datetime format
+dt = list(including_data.keys())
+dt_datetime = [datetime.utcfromtimestamp(int(x)) for x in dt]
+
+# List of dict keys (unix), convert to datetime format
+clim_dt = list(climate.keys())
+clim_datetime = [datetime.utcfromtimestamp(int(x)) for x in clim_dt]
+
+# Create a Plotly figure
+fig = go.Figure()
+
+fig.add_trace(go.Scatter(x=clim_datetime, y=temp, mode='lines', 
+line_color = "#ff894a", opacity=0.5, name='Air'))
+
+fig.add_trace(go.Scatter(x=dt_datetime, y=including_water, mode='lines', 
+line_color = "#3f9cff", opacity=0.75, name='Water'))
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Temperature (°C)", 
+    legend_title="Material",
+    title=dict(text="Air temperature (measured), water temperature (modelled)"),
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+
+# Save the figure as an HTML file
+fig.write_html("./images/measured_air_modelled_water_temperature.html")
+
+# Optionally, display the plot inline
+# fig.show()
+
+```
+
+<iframe src="./images/measured_air_modelled_water_temperature.html" width="100%" height="400px"></iframe>
+
+
+> How are air and water temperatures changing throughout the year?
+
+## Effects on air temperature 
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+import plotly.graph_objects as go
+import plotly.io as pio
+from datetime import datetime, timedelta
+from pandas import to_datetime
+from dateutil.relativedelta import relativedelta
+from numpy import quantile
+
+# Set internal
+start_date = "2022-01-01 10:00:00"
+
+# Try
+try:
+
+    # Load summary file, including | excluding hading
+    with open(f"./data/manchester-canals-summary.json") as path:
+            summary_data = json.load(path)
+
+# File not found
+except FileNotFoundError:
+    exit("File not found")
+
+# Init figure
+fig= go.Figure()
+
+# Colours and fills
+line_colour = ["#143ea8","#dd3b17", "#14621d"]
+fill_colour = ["#5e86e8", "#ef8a74", "#70b678"]
+
+# Iterate
+for period, visibiity, lc, fc in zip(["weekly", "fortnightly", "monthly"], ["legendonly", "legendonly", True],
+line_colour, fill_colour):
+
+    # Extract daytime and nighttime data
+    day_medians = [x[f'{period} values']['day medians'] for x in summary_data.values()]
+    night_medians = [x[f'{period} values']['night medians'] for x in summary_data.values()]
+
+    # Transpose data from by feature to by interval
+    day_medians = list(map(list, zip(*day_medians)))
+    night_medians = list(map(list, zip(*night_medians)))
+
+    # Ignore the final entry
+    if period == "fortnightly" or period == "weekly":
+        day_medians = day_medians[:-1]
+        night_medians = night_medians[:-1]
+
+    # Localise niave datetime to aware datetime (UK) and then convert to UTC
+    local_datetime = to_datetime(start_date)\
+        .tz_localize('Europe/London')\
+        .tz_convert('UTC')
+
+    # Create list of datetimes for x-axis
+    if period == "fortnightly":
+        dt = [local_datetime + timedelta(days = 7 * (2 * n - 1)) for n in range(1, len(day_medians)+1)]
+    elif period == "weekly":
+        dt = [local_datetime + timedelta(days = 3 + (7 * n)) for n in range(0, len(day_medians))]
+    elif period == "monthly":
+        dt = [local_datetime + relativedelta(months=n) for n in range(0, len(day_medians))]
+
+    # Extract quantiles
+    q1 = [quantile(x, 0.25) for x in day_medians]
+    med =  [quantile(x, 0.5) for x in day_medians]
+    q3 = [quantile(x, 0.75) for x in day_medians]
+
+    # Add line
+    fig.add_trace(go.Scatter(x=dt, y=med, mode='lines', 
+    line_color = lc, opacity=0.9, name=period.capitalize(), legendgroup=period,
+    visible=visibiity))
+
+    fig.add_trace(go.Scatter(
+        x=dt+dt[::-1], # x, then x reversed
+        y=q3+q1[::-1], # upper, then lower reversed
+        fill='toself',
+        fillcolor=fc,
+        opacity = 0.5,
+        line=dict(color='rgba(255,255,255,0)'),
+        hoverinfo="skip",
+        showlegend=False,
+        legendgroup=period, visible=visibiity
+    ))
+
+# Update layout
+fig.update_layout(
+    title=dict(text='Aggregated daytime effects'),
+    xaxis_title="Date", yaxis_title="Air temperature effect (°C)",
+    legend=dict(orientation="h",
+    yanchor="bottom", y=-0.3,
+    xanchor="left", x=0, 
+    title = "Period"),
+    hovermode="x"
+)
+
+
+# Save the figure as an HTML file
+fig.write_html("./images/seasonal_effects_day.html")
+
+```
+
+<iframe src="./images/seasonal_effects_day.html" width="100%" height="400px"></iframe>
+
+2022 was the warmest year on record in the UK, in series stretching back to 1884 ( Kendon et al. [2023](https://doi.org/10.1002/joc.8167)) and 1659 (Manley et al. [1974](https://doi.org/10.1002/qj.49710042511)), with the summer period marked by extreme heatwaves on 15–17 June, 17–19 July and 9–15 August. Of these, the 17–19 July heatwave resulted in the UK’s highest ever recorded temperature, at 40.3°C (Witze [2024](https://doi.org/10.1038/d41586-024-00074-z)). 
+
+> Is there evidence of these heatwaves in the series? What does this do to air temperature?
+
+As above, but here showing the effects at night.
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+import plotly.graph_objects as go
+import plotly.io as pio
+from datetime import datetime, timedelta
+from pandas import to_datetime
+from dateutil.relativedelta import relativedelta
+from numpy import quantile
+
+# Set internal
+start_date = "2022-01-01 10:00:00"
+
+# Try
+try:
+
+    # Load summary file, including | excluding hading
+    with open(f"./data/manchester-canals-summary.json") as path:
+            summary_data = json.load(path)
+
+# File not found
+except FileNotFoundError:
+    exit("File not found")
+
+# Init figure
+fig= go.Figure()
+
+# Colours and fills
+line_colour = ["#143ea8","#dd3b17", "#14621d"]
+fill_colour = ["#5e86e8", "#ef8a74", "#70b678"]
+
+# Iterate
+for period, visibiity, lc, fc in zip(["weekly", "fortnightly", "monthly"], ["legendonly", "legendonly", True],
+line_colour, fill_colour):
+
+    # Extract daytime and nighttime data
+    day_medians = [x[f'{period} values']['day medians'] for x in summary_data.values()]
+    night_medians = [x[f'{period} values']['night medians'] for x in summary_data.values()]
+
+    # Transpose data from by feature to by interval
+    day_medians = list(map(list, zip(*day_medians)))
+    night_medians = list(map(list, zip(*night_medians)))
+
+    # Ignore the final entry
+    if period == "fortnightly" or period == "weekly":
+        day_medians = day_medians[:-1]
+        night_medians = night_medians[:-1]
+
+    # Localise niave datetime to aware datetime (UK) and then convert to UTC
+    local_datetime = to_datetime(start_date)\
+        .tz_localize('Europe/London')\
+        .tz_convert('UTC')
+
+    # Create list of datetimes for x-axis
+    if period == "fortnightly":
+        dt = [local_datetime + timedelta(days = 7 * (2 * n - 1)) for n in range(1, len(night_medians)+1)]
+    elif period == "weekly":
+        dt = [local_datetime + timedelta(days = 3 + (7 * n)) for n in range(0, len(night_medians))]
+    elif period == "monthly":
+        dt = [local_datetime + relativedelta(months=n) for n in range(0, len(night_medians))]
+
+    # Extract quantiles
+    q1 = [quantile(x, 0.25) for x in night_medians]
+    med =  [quantile(x, 0.5) for x in night_medians]
+    q3 = [quantile(x, 0.75) for x in night_medians]
+
+    # Add line
+    fig.add_trace(go.Scatter(x=dt, y=med, mode='lines', 
+    line_color = lc, opacity=0.9, name=period.capitalize(), legendgroup=period,
+    visible=visibiity))
+
+    fig.add_trace(go.Scatter(
+        x=dt+dt[::-1], # x, then x reversed
+        y=q3+q1[::-1], # upper, then lower reversed
+        fill='toself',
+        fillcolor=fc,
+        opacity = 0.5,
+        line=dict(color='rgba(255,255,255,0)'),
+        hoverinfo="skip",
+        showlegend=False,
+        legendgroup=period, visible=visibiity
+    ))
+
+# Update layout
+fig.update_layout(
+    title=dict(text='Aggregated nighttime effects'),
+    xaxis_title="Date", yaxis_title="Air temperature effect (°C)",
+    legend=dict(orientation="h",
+    yanchor="bottom", y=-0.3,
+    xanchor="left", x=0, 
+    title = "Period"),
+    hovermode="x"
+)
+
+
+# Save the figure as an HTML file
+fig.write_html("./images/seasonal_effects_night.html")
+
+```
+
+<iframe src="./images/seasonal_effects_night.html" width="100%" height="400px"></iframe>
+
+> What effect do canals have an overnight temperatures? How does this change seasonally? 
+
+## Key results
+
+Canals have a cooling effect during the day
+
+Canals have a warming effect during the night
+
+Pronounced during spring
+
+Reduced, but still important during summer
+

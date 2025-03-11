@@ -1,16 +1,121 @@
 [
   {
+    "objectID": "temperature.html",
+    "href": "temperature.html",
+    "title": "Temperature",
+    "section": "",
+    "text": "Explore the effects of changing the air temperature (test).\n\nInterpretation: increasing air temperature, increases canal temperature (surface). Not particularly insightful!\n\n\n\nHow has increasing the air temperature of the environment influenced the water temperature?\n\nIn the daytime, most cooling during spring, less during summer\nThe effect of increasing air temperature (on the effects of canals of air temperature) seems relatively small, but appears to decrease daytime cooling slightly.\n\n\nWhen it comes to warming water, solar intensity plays a significantly greater role than air temperature, as the direct absorption of sunlight by the water surface is the primary driver of heat gain, while air temperature primarily affects heat transfer through convection, which is usually less impactful than the direct solar radiation absorption. (AI)\nSee https://doi.org/10.2166/nh.2021.148\nUltimately, air temperature likely to have a small effect (convection).\nNot 100% sure on this… but whatever"
+  },
+  {
+    "objectID": "results.html",
+    "href": "results.html",
+    "title": "Results",
+    "section": "",
+    "text": "Plot of water temperature results (including shading)\n\n\n\nHow are air and water temperatures changing throughout the year?"
+  },
+  {
+    "objectID": "results.html#water-temperature",
+    "href": "results.html#water-temperature",
+    "title": "Results",
+    "section": "",
+    "text": "Plot of water temperature results (including shading)\n\n\n\nHow are air and water temperatures changing throughout the year?"
+  },
+  {
+    "objectID": "results.html#effects-on-air-temperature",
+    "href": "results.html#effects-on-air-temperature",
+    "title": "Results",
+    "section": "Effects on air temperature",
+    "text": "Effects on air temperature\n\n\n2022 was the warmest year on record in the UK, in series stretching back to 1884 ( Kendon et al. 2023) and 1659 (Manley et al. 1974), with the summer period marked by extreme heatwaves on 15–17 June, 17–19 July and 9–15 August. Of these, the 17–19 July heatwave resulted in the UK’s highest ever recorded temperature, at 40.3°C (Witze 2024).\n\nIs there evidence of these heatwaves in the series? What does this do to air temperature?\n\nAs above, but here showing the effects at night.\n\n\n\nWhat effect do canals have an overnight temperatures? How does this change seasonally?"
+  },
+  {
+    "objectID": "results.html#key-results",
+    "href": "results.html#key-results",
+    "title": "Results",
+    "section": "Key results",
+    "text": "Key results\nCanals have a cooling effect during the day\nCanals have a warming effect during the night\nPronounced during spring\nReduced, but still important during summer"
+  },
+  {
+    "objectID": "model.html",
+    "href": "model.html",
+    "title": "Model",
+    "section": "",
+    "text": "The model is based on the characteristics of the canal:\n\narea\ndepth\n\nThe weather:\n\ntemperature\nhumidity\nwind speed\ncloud cover\n\nThe characteristics of the environment:\n\ndegree of shading\nsolar input"
+  },
+  {
+    "objectID": "model.html#inputs",
+    "href": "model.html#inputs",
+    "title": "Model",
+    "section": "",
+    "text": "The model is based on the characteristics of the canal:\n\narea\ndepth\n\nThe weather:\n\ntemperature\nhumidity\nwind speed\ncloud cover\n\nThe characteristics of the environment:\n\ndegree of shading\nsolar input"
+  },
+  {
+    "objectID": "model.html#approach",
+    "href": "model.html#approach",
+    "title": "Model",
+    "section": "Approach",
+    "text": "Approach\nIt begins by creating inital temperatures and energy values for layers of the water column, then models these through time based on different energy exchanges (convective, radiative, conductive)."
+  },
+  {
+    "objectID": "model.html#validation",
+    "href": "model.html#validation",
+    "title": "Model",
+    "section": "Validation",
+    "text": "Validation\n\n“All models are wrong, but some are useful”\n– George Box\n\n\n“Truth is much too complicated to allow anything but approximations.”\n– John von Neumann\n\nFor validation, we have some data from Canal and River Trust. Talk about this in more detail…\n\nHave a look at it…\n\nTO DO: pop-ups with data? Add marker for monitoring station\n\n\nMake this Notebook Trusted to load map: File -&gt; Trust Notebook\n\n\nWe can now compare our measured data compared to the modelled data\n\nHave a look at it…\n\n\n\n\nHow well do you think the model is performing?\n\n\n\nThe mean absolute residual is 1.01°C, with p25 of 0.57°C and p75 of 1.58°C.\n\nWhat factors might account for under- or over-prediction of water temperature? Consider the inputs, model assumptions…"
+  },
+  {
+    "objectID": "area.html",
+    "href": "area.html",
+    "title": "Area",
+    "section": "",
+    "text": "When calculating the effects of the water on the temperature of the surrounding environment, we need to determine the size of the environment we are modelling i.e., are we estimating the change in temperature in a 1 km2 area around the canal, a 100 m2 area, or for the whole city?\nPrevious studies have shown that small water bodies can have a measurable effect within 30 - 40 m (Hathaway and Sharples, 2012, Park et al. 2019) and potentially up to 60 m (Kim et al. 2014). In our model, we therefore use a 100-m wide corridor around the canal (10-m tall), which is equivalent to 50-m buffer on all sides.\nBuffering is a standard GIS operation found in almost all relevant software and code e.g., in ArcGIS, QGIS or using Shapely and Geopandas.\nHowever, it is not an appropriate approach for our model because of the importance of shape complexity.\nTo illustrate, let’s look at two canals in the city centre, one on the Manchester Bolton and Bury Canal (mabc_8) and the other on the Bridegwater Canal (bc_83).\n\n\nMake this Notebook Trusted to load map: File -&gt; Trust Notebook\n\n\nThese canal sections have very similar areas of 2113.67 m2 (mbabc_8) and 2069.48 m2 (bc_83).\nHowever, because of differing shape complexity, using a standard buffer e.g., shape.buffer(50) results in quite different buffer areas of 26218.45 m2 (mbabc_8) and 22832.39 m2 (bc_83).\nFor mbabc_8, the buffer area is approximately 12.40× larger, but only 11.03× for bc_83.\nFor most spatial queries, shape complexity isn’t an important issue. In our case though, this is a problem because the magnitude of the temperature effect is partly dependent on the size of the area we are modelling for i.e., the same energy flux averaged over a larger area = a smaller temperature effect, whereas averaged over a smaller area = a larger temperature effect.\nThe underlying principle is that if bc_83 and mbabc_8 were identical in water temperature and energy storage, then they should have an identical effect on the surrounding environment in our non-spatial model. Using a standard buffer would not produce this behaviour, as different temperature effects would be produced due to modelling of different size areas (12.40× vs. 11.03×)!\nTo account for this, we can use a shape-normalised buffer, which involves creating a circle of the same area of the canal, and then buffering by the desired amount.\n\n\n\nA shape-normalised buffer\n\n\nThe advantage of this approach is that the buffered area increases linearly with the area of the canal, which is shown below for the full dataset of modelled canals in the UK and Ireland, where A shows canal area (x) compared to a standard buffer area (y), and B shows canal area (x) compared to a shape-normalised buffer area (y):\n\n\n\nStandard vs. shape-normalised buffers"
+  },
+  {
+    "objectID": "area.html#the-environment",
+    "href": "area.html#the-environment",
+    "title": "Area",
+    "section": "",
+    "text": "When calculating the effects of the water on the temperature of the surrounding environment, we need to determine the size of the environment we are modelling i.e., are we estimating the change in temperature in a 1 km2 area around the canal, a 100 m2 area, or for the whole city?\nPrevious studies have shown that small water bodies can have a measurable effect within 30 - 40 m (Hathaway and Sharples, 2012, Park et al. 2019) and potentially up to 60 m (Kim et al. 2014). In our model, we therefore use a 100-m wide corridor around the canal (10-m tall), which is equivalent to 50-m buffer on all sides.\nBuffering is a standard GIS operation found in almost all relevant software and code e.g., in ArcGIS, QGIS or using Shapely and Geopandas.\nHowever, it is not an appropriate approach for our model because of the importance of shape complexity.\nTo illustrate, let’s look at two canals in the city centre, one on the Manchester Bolton and Bury Canal (mabc_8) and the other on the Bridegwater Canal (bc_83).\n\n\nMake this Notebook Trusted to load map: File -&gt; Trust Notebook\n\n\nThese canal sections have very similar areas of 2113.67 m2 (mbabc_8) and 2069.48 m2 (bc_83).\nHowever, because of differing shape complexity, using a standard buffer e.g., shape.buffer(50) results in quite different buffer areas of 26218.45 m2 (mbabc_8) and 22832.39 m2 (bc_83).\nFor mbabc_8, the buffer area is approximately 12.40× larger, but only 11.03× for bc_83.\nFor most spatial queries, shape complexity isn’t an important issue. In our case though, this is a problem because the magnitude of the temperature effect is partly dependent on the size of the area we are modelling for i.e., the same energy flux averaged over a larger area = a smaller temperature effect, whereas averaged over a smaller area = a larger temperature effect.\nThe underlying principle is that if bc_83 and mbabc_8 were identical in water temperature and energy storage, then they should have an identical effect on the surrounding environment in our non-spatial model. Using a standard buffer would not produce this behaviour, as different temperature effects would be produced due to modelling of different size areas (12.40× vs. 11.03×)!\nTo account for this, we can use a shape-normalised buffer, which involves creating a circle of the same area of the canal, and then buffering by the desired amount.\n\n\n\nA shape-normalised buffer\n\n\nThe advantage of this approach is that the buffered area increases linearly with the area of the canal, which is shown below for the full dataset of modelled canals in the UK and Ireland, where A shows canal area (x) compared to a standard buffer area (y), and B shows canal area (x) compared to a shape-normalised buffer area (y):\n\n\n\nStandard vs. shape-normalised buffers"
+  },
+  {
+    "objectID": "area.html#changing-canal-area",
+    "href": "area.html#changing-canal-area",
+    "title": "Area",
+    "section": "Changing canal area",
+    "text": "Changing canal area\nUsing this approach, we can then start to investigate how changing the area of the canal influences the magnitude of the temperature effect.\nAgain, we will use rc_9 as an example, re-running the model with different areas (×0.5, ×1.5, ×2.0, ×3.0). This produces the following results, which are the average daytime temperature effect across the year:\n\n\n\nHow does canal area influence the magnitude of the effect of the surrounding air? Why might this be?"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "GEOG70812: Local Scale Mitigation",
     "section": "",
-    "text": "Anthropogenic climate change is one of the principal threats facing humanity (1). While climate change impacts vary in form and intensity across the globe (2), urban areas are particularly vulnerable due to the high and growing concentration of human assets and activities (3, 4), comprising ~4.5 billion individuals in 2022 (5). Impacts associated with rising average temperatures, as well as an increase in the frequency and intensity of extreme weather events, such as heatwaves (6), also have a disproportionate impact in urban areas due to the urban heat island (UHI) effect, in which cities are typically warmer than surrounding rural areas due to the effect of building materials and morphology on energy exchange and airflow (7, 8). In combination, these trends have important consequences for morbidity and mortality in urban areas (9).\n\nExplore Manchester’s canal network below, and the buildings within 100 m.\n\n\n\nMake this Notebook Trusted to load map: File -&gt; Trust Notebook"
+    "text": "Introductory text, describing the overall context.\n\nExplore Manchester’s canal network below, and the buildings within 100 m.\n\n\n\nMake this Notebook Trusted to load map: File -&gt; Trust Notebook\n\n\nIn today’s practical, we’re going to explore the model, considering its structure, validation and initial results. We’ll also explore the sensitivity of the model to changing inputs, including the degree of shading and canal area, and model performance under changing climate.\nTo finish, there is a short formative quiz to test your knowledge."
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Temperature",
+    "objectID": "quiz.html",
+    "href": "quiz.html",
+    "title": "Quiz",
     "section": "",
-    "text": "Anthropogenic climate change is one of the principal threats facing humanity (1). While climate change impacts vary in form and intensity across the globe (2), urban areas are particularly vulnerable due to the high and growing concentration of human assets and activities (3, 4), comprising ~4.5 billion individuals in 2022 (5). Impacts associated with rising average temperatures, as well as an increase in the frequency and intensity of extreme weather events, such as heatwaves (6), also have a disproportionate impact in urban areas due to the urban heat island (UHI) effect, in which cities are typically warmer than surrounding rural areas due to the effect of building materials and morphology on energy exchange and airflow (7, 8). In combination, these trends have important consequences for morbidity and mortality in urban areas (9).\n\nExplore the effects of adding shading to water temperature (test).\n\n\n\n\nHow has adding shading to the environment influenced the water temperature?"
+    "text": "Answer the following questions:\n\n\n\n\n\nWhat effect do canals have on daytime temperatures?\n\nCooling No effect Warming\n\n\n\n\n\n\n\nWhat effect do canals have on nighttime temperatures?\n\nCooling No effect Warming\n\n\n\n\n\n\n\nWhich season typically sees the greatest daytime effects on temperature?\n\nWinter Spring Summer Autumn\n\n\n\n\n\n\n\nWhich season typically sees the greatest nighttime effects on temperature?\n\nWinter Spring Summer Autumn\n\n\n\n\n\n\n\nHow does increasing shading influence the effect of canals on air temperatures?\n\nIncreased cooling No effect Reduced cooling\n\n\n\n\n\n\n\nHow does increasing canal area influence the effect of canals on air temperatures?\n\nIncreased cooling No effect Reduced cooling\n\n\n\n\n\n\n\n\nIf you’ve been through the practical and want to explore some of this further, one thing we might to reflect on is the accuracy of our shading calculations. In our model, we use an existing package called pybdshadow, designed specifically for generating building shadows, and base our calculations based on building geometries (footprints, heights) from the Ordnance Survey MasterMap Topography layer.\nTo illustrate the typical outputs, you can download the canal geometry for one feature of the Ashton Canal (ac1_6), the nearby building geometries, and the shadows produced at a specific datetime (2022-01-01 09:45:00). [Note: shadows are only produced for buildings in the solar direction, for computational ease]\nHere’s the ShadeApp output: https://shademap.app/@53.48025,-2.22222,16.00077z,1735724716321t,0b,0p,0m!1735719966854!1735747267074# Here’s the suncalc output: https://www.suncalc.org/#/53.4794,-2.2221,17/2022.01.01/09:45/27.5/3"
+  },
+  {
+    "objectID": "quiz.html#general-knowledge-quiz",
+    "href": "quiz.html#general-knowledge-quiz",
+    "title": "Quiz",
+    "section": "",
+    "text": "Answer the following questions:\n\n\n\n\n\nWhat effect do canals have on daytime temperatures?\n\nCooling No effect Warming\n\n\n\n\n\n\n\nWhat effect do canals have on nighttime temperatures?\n\nCooling No effect Warming\n\n\n\n\n\n\n\nWhich season typically sees the greatest daytime effects on temperature?\n\nWinter Spring Summer Autumn\n\n\n\n\n\n\n\nWhich season typically sees the greatest nighttime effects on temperature?\n\nWinter Spring Summer Autumn\n\n\n\n\n\n\n\nHow does increasing shading influence the effect of canals on air temperatures?\n\nIncreased cooling No effect Reduced cooling\n\n\n\n\n\n\n\nHow does increasing canal area influence the effect of canals on air temperatures?\n\nIncreased cooling No effect Reduced cooling\n\n\n\n\n\n\n\n\nIf you’ve been through the practical and want to explore some of this further, one thing we might to reflect on is the accuracy of our shading calculations. In our model, we use an existing package called pybdshadow, designed specifically for generating building shadows, and base our calculations based on building geometries (footprints, heights) from the Ordnance Survey MasterMap Topography layer.\nTo illustrate the typical outputs, you can download the canal geometry for one feature of the Ashton Canal (ac1_6), the nearby building geometries, and the shadows produced at a specific datetime (2022-01-01 09:45:00). [Note: shadows are only produced for buildings in the solar direction, for computational ease]\nHere’s the ShadeApp output: https://shademap.app/@53.48025,-2.22222,16.00077z,1735724716321t,0b,0p,0m!1735719966854!1735747267074# Here’s the suncalc output: https://www.suncalc.org/#/53.4794,-2.2221,17/2022.01.01/09:45/27.5/3"
+  },
+  {
+    "objectID": "quiz.html#a-little-bit-more",
+    "href": "quiz.html#a-little-bit-more",
+    "title": "Quiz",
+    "section": "",
+    "text": "If you’ve been through the practical and want to explore some of this further, one thing we might to reflect on is the accuracy of our shading calculations. In our model, we use an existing package called pybdshadow, designed specifically for generating building shadows, and base our calculations based on building geometries (footprints, heights) from the Ordnance Survey MasterMap Topography layer.\nTo illustrate the typical outputs, you can download the canal geometry for one feature of the Ashton Canal (ac1_6), the nearby building geometries, and the shadows produced at a specific datetime (2022-01-01 09:45:00). [Note: shadows are only produced for buildings in the solar direction, for computational ease]\nHere’s the ShadeApp output: https://shademap.app/@53.48025,-2.22222,16.00077z,1735724716321t,0b,0p,0m!1735719966854!1735747267074# Here’s the suncalc output: https://www.suncalc.org/#/53.4794,-2.2221,17/2022.01.01/09:45/27.5/3"
+  },
+  {
+    "objectID": "shading.html",
+    "href": "shading.html",
+    "title": "Shading",
+    "section": "",
+    "text": "To explore the effects of shading, let’s look at one section of the Bridgewater Canal, Manchester.\nThis is a relatively large canal, but with few buildings in the surrounding area (Cornbrook). As a former industrial area, there is development potential.\n\n\n\nBartholomew map of Cornbrook (1900). Source\n\n\nHere is the canal today, and nearby building geometries.\n\n\nMake this Notebook Trusted to load map: File -&gt; Trust Notebook\n\n\n\nExplore the effects of adding shading to water temperature (test).\n\nAlso run with rc_17, rc_9\n\n\n\nHow has adding shading to the environment influenced the water temperature?\n\nHere we have the net change in air temperature, associated with water only (reference material excluded).\n0 is the unshaded model\nThen we add the actual shading for bc_277 (minimal effect)\nWe also re-run using the shading parameters for a nearby canal section on the Rochdale Canal (rc_9), which is a proxy for the shading that could occur if this area was extensively developed\nWe also run with the (unrealistic) full shading (canal entirely shaded)"
   }
 ]

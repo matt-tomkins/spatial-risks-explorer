@@ -1,0 +1,250 @@
+---
+title: "Shading"
+---
+
+To explore the effects of shading, let's look at one section of the Bridgewater Canal, Manchester.
+
+This is a relatively large canal, but with few buildings in the surrounding area (*Cornbrook*). As a former industrial area, there is development potential. 
+
+![Bartholomew map of Cornbrook (1900). [Source](https://manchester.publicprofiler.org/beta/index.php)](images\bartholomew-1900-map.png)
+
+Here is the canal today, and nearby building geometries.
+
+```{python}
+#| echo: false
+
+# Source: https://www.riannek.de/2022/gpx-to-geopandas/
+import folium
+import os
+import json
+from geopandas import read_file, GeoDataFrame
+from pandas import concat
+from folium.plugins import GroupedLayerControl
+
+# Load canals data
+with open('./data/manchester-canals-4326.geojson', 'r') as f:
+    data = json.load(f)
+
+# Load buildings data
+with open('./data/manchester-buildings-4326.geojson', 'r') as f:
+    buildings = json.load(f)
+
+# Extract data and init dict
+#canals = data['features']
+#buildings = b['features']
+
+# Canal name
+id = "bc_77"
+extract = data['features']
+
+# Filter based on canal names
+filtered = [geo for geo in extract if geo['properties']['code_id'] == id]
+excluded = [geo for geo in extract if geo['properties']['code_id'] != id]
+
+# Convert to GeoJSON feature collection format
+filtered_dict = {
+    "type": "FeatureCollection",
+    "name": id,
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": filtered}
+excluded_dict = {
+    "type": "FeatureCollection",
+    "name": f"not-{id}",
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": excluded}
+
+# Create map
+m = folium.Map(location=(53.472648,-2.241951), zoom_start=11, 
+                tiles="Cartodb Positron")
+
+# Add canals
+folium.GeoJson(filtered_dict, style_function=lambda feature: {
+"fillColor": "#72b4f9",
+"color": "#2b5d93"}, name="Canals",
+zoom_on_click=True).add_to(m)
+
+# Fit to map content
+folium.FitOverlays().add_to(m)
+
+# Add buildings
+folium.GeoJson(buildings, style_function=lambda feature: {
+"fillColor": "#b6b6b6",
+"color": "#505050",
+"weight": 1}, name=f"Buildings",
+zoom_on_click=True).add_to(m)
+
+# Add other canals
+folium.GeoJson(excluded_dict, style_function=lambda feature: {
+    "fillColor": "#d6e7f9",
+    "color": "#85add6"}, name="Neighbouring canals",
+    zoom_on_click=True).add_to(m)
+
+# Add layer control
+folium.LayerControl().add_to(m)
+
+# Show map
+m
+
+```
+
+> Explore the effects of adding shading to water temperature (test).
+
+Also run with rc_17, rc_9
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+
+# Load canals data
+with open('./data/bc_77_excluding_shading.json', 'r') as f:
+    excluding_data = json.load(f)
+
+# Load buildings data
+with open('./data/bc_77_including_shading.json', 'r') as f:
+    including_data = json.load(f)
+
+with open('./data/bc_77_including_shading_full.json', 'r') as f:
+    full_shading = json.load(f)
+
+# Extract water temperature values, excluding | including shading effects
+excluding_water = [x['surface_water_k'] - 273.15 for x in excluding_data.values()]
+including_water = [x['surface_water_k'] - 273.15 for x in including_data.values()]
+full_water = [x['surface_water_k'] - 273.15 for x in full_shading.values()]
+
+ # Extract water temperature values, excluding | including shading effects
+excluding_concrete = [x['surface_concrete_k'] - 273.15 for x in excluding_data.values()]
+including_concrete = [x['surface_concrete_k'] - 273.15 for x in including_data.values()]
+full_concrete =  [x['surface_concrete_k'] - 273.15 for x in full_shading.values()]
+
+# Extract differences
+diff_water = [e - i  for e, i in zip(excluding_water, including_water)]  
+diff_concrete = [e - i  for e, i in zip(excluding_concrete, including_concrete)]  
+
+# List of dict keys (unix), convert to datetime format
+dt = list(excluding_data.keys())
+dt_datetime = [datetime.utcfromtimestamp(int(x)) for x in dt]
+
+# Create a Plotly figure
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=dt_datetime, y=full_water, mode='lines', 
+line_color = "#3f9cff", opacity=0.75, visible='legendonly', name='Full shading'))
+fig.add_trace(go.Scatter(x=dt_datetime, y=including_water, mode='lines', 
+line_color = "#707070", opacity=0.75, visible='legendonly', name='Including shading'))
+fig.add_trace(go.Scatter(x=dt_datetime, y=excluding_water, mode='lines', 
+line_color = "#FFB16F", opacity=0.75, name='Excluding shading'))
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Water temperature (°C)", 
+    legend_title="Shading amount",
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+
+# Save the figure as an HTML file
+fig.write_html("./images/shading_water_temperature.html")
+
+# Optionally, display the plot inline
+# fig.show()
+
+```
+
+<iframe src="./images/shading_water_temperature.html" width="100%" height="600px"></iframe>
+
+> How has adding shading to the environment influenced the water temperature? 
+
+Here we have the net change in air temperature, associated with water only (reference material excluded).
+
+0 is the unshaded model
+
+Then we add the actual shading for bc_277 (minimal effect)
+
+We also re-run using the shading parameters for a nearby canal section on the Rochdale Canal (rc_9), which is a proxy for the shading that could occur if this area was extensively developed
+
+We also run with the (unrealistic) full shading (canal entirely shaded)
+
+```{python}
+#| echo: false
+#| warning: false
+
+import glob
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+from pandas import to_datetime
+from datetime import timedelta
+
+# Load summary file of interest
+variable = "shading"
+with open(f'./data/bc_77-{variable}-summary.json', 'r') as file:
+        data = json.load(file)
+
+# Localise niave datetime to aware datetime (UK) and then convert to UTC
+local_datetime = to_datetime("2022-01-01 10:00:00")\
+.tz_localize('Europe/London')\
+.tz_convert('UTC')
+
+# Create a Plotly figure, colour list
+fig = go.Figure()
+colours = ["#3f9cff", "#707070", "#FFB16F","#ff7764"]
+
+# Use excluding shading as the baseline
+baseline = data['.\\bc_77_excluding_shading.json']
+baseline_day = baseline['weekly values']['day medians'][:-1]
+baseline_night = baseline['weekly values']['night medians'][:-1]
+
+# Keys and labels
+keys = ['.\\bc_77_excluding_shading.json', '.\\bc_77_including_shading.json', 
+'.\\bc_77_including_rc_9.json', '.\\bc_77_including_shading_full.json']
+labels = ['Excluding shading', 'Including shading', 'Developed shading', 'Full shading']
+
+# Iterate through
+for key, label, c in zip(keys, labels, colours):
+
+    # Extract data
+    value = data[key]
+
+    # Weekly values, ignore final entry
+    day_gross = value['weekly values']['day medians'][:-1]
+    night_gross = value['weekly values']['night medians'][:-1]
+
+    # Calculate net difference
+    day_medians = [x - y for x, y in zip(day_gross, baseline_day)]
+    night_medians = [x - y for x, y in zip(night_gross, baseline_day)]
+
+    # Create list of datetimes for x-axis
+    dt = [local_datetime + timedelta(days = 3 + (7 * n)) for n in range(0, len(day_medians))]
+
+    # Add trace
+    if key == '.\\bc_77_excluding_shading.json':
+        fig.add_trace(go.Scatter(x=dt, y=day_medians, mode='lines', 
+        line_color = c, opacity=0.75, name=label))
+
+    # Else, hide to start
+    else:
+        fig.add_trace(go.Scatter(x=dt, y=day_medians, mode='lines', 
+        line_color = c, opacity=0.75, visible="legendonly", name=label))
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Net change in air temperature (°C)", 
+    legend=dict(orientation="h",
+    yanchor="bottom", y=-0.3,
+    xanchor="left", x=0, 
+    title = "Shading amount"
+))
+
+
+
+# Save the figure as an HTML file
+fig.write_html("./images/shading_effects.html")
+
+#fig.show()
+
+```
+
+<iframe src="./images/shading_effects.html" width="100%" height="600px"></iframe>

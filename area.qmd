@@ -1,0 +1,222 @@
+---
+title: "Area"
+---
+
+## The environment
+
+When calculating the effects of the water on the temperature of the surrounding environment, we need to determine the size of the environment we are modelling i.e., are we estimating the change in temperature in a 1 km^2^ area around the canal, a 100 m^2^ area, or for the whole city? 
+
+Previous studies have shown that small water bodies can have a measurable effect within 30 - 40 m  (Hathaway and Sharples, [2012](https://doi.org/10.1016/j.buildenv.2012.06.013), Park et al. [2019](https://doi.org/10.1016/j.landurbplan.2018.10.022)) and potentially up to 60 m (Kim et al. [2014](http://dx.doi.org/10.4236/jep.2014.55048)). In our model, we therefore use a 100-m wide corridor around the canal (10-m tall), which is equivalent to 50-m buffer on all sides. 
+
+Buffering is a standard GIS operation found in almost all relevant software and code e.g., in [ArcGIS](https://pro.arcgis.com/en/pro-app/latest/tool-reference/analysis/buffer.htm), [QGIS](https://docs.qgis.org/3.40/en/docs/gentle_gis_introduction/vector_spatial_analysis_buffers.html) or using [Shapely and Geopandas](https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoSeries.buffer.html). 
+
+However, it is not an appropriate approach for our model because of the importance of **shape complexity**. 
+
+To illustrate, let's look at two canals in the city centre, one on the Manchester Bolton and Bury Canal (`mabc_8`) and the other on the Bridegwater Canal (`bc_83`).
+```{python}
+#| echo: false
+
+# Source: https://www.riannek.de/2022/gpx-to-geopandas/
+import folium
+import os
+import json
+from geopandas import read_file, GeoDataFrame, GeoSeries
+from pandas import concat
+from folium.plugins import GroupedLayerControl
+from shapely.geometry import Polygon
+
+# Load canals data
+with open('./data/manchester-canals-4326.geojson', 'r') as f:
+    data = json.load(f)
+
+# Canal name
+id_a = "mbabc_8"
+id_b = "bc_83"
+
+# Extract features
+extract = data['features']
+
+# Convert to geodataframe, extract features, set crs and project
+gdf = GeoDataFrame.from_features(extract)
+
+# Create map
+m = folium.Map(location=(53.472648,-2.241951), zoom_start=11, 
+                tiles="Cartodb Positron")
+
+# Init output
+output = {}
+
+# Filter based on canal names
+for id in [id_a, id_b]:
+  canal = [geo for geo in extract if geo['properties']['code_id'] == id]
+  
+  # Return canal
+  selected_canals = gdf[gdf['code_id'].isin([id])]
+  selected_canals.crs = "EPSG:4326"
+  transformed = selected_canals.to_crs(27700)
+
+  # Buffer by 50 m
+  buffer = transformed.buffer(50)
+  buffered_canals = GeoSeries(data = buffer, crs = "EPSG:27700")
+
+  # Store ID and area
+  output[id] = {'area' : canal[0]['properties']['area'],
+                  'buffer_area' : buffered_canals.area.iloc[0].item()}
+
+  # Convert to GeoJSON feature collection format
+  canal_dict = {
+      "type": "FeatureCollection",
+      "name": id,
+      "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+      "features": canal}
+
+  # Add buffers
+  folium.GeoJson(buffered_canals, style_function=lambda feature: {
+  "fillColor": "#3cafff",
+  "color": "#8dd0ff", "fillOpacity": 0.3,
+  "dashArray": "2, 2"}, name=f"{id} 50-m buffer",
+  zoom_on_click=True).add_to(m)
+
+  # Add canals
+  folium.GeoJson(canal_dict, style_function=lambda feature: {
+  "fillColor": "#72b4f9",
+  "color": "#2b5d93"}, name=id,
+  zoom_on_click=True).add_to(m)
+
+# Fit to map content
+folium.FitOverlays().add_to(m)
+
+# Add layer control
+folium.LayerControl().add_to(m)
+
+# Summary objects
+mbabc_area = f"{output['mbabc_8']['area']:.2f}"
+mbabc_buffer_area = f"{output['mbabc_8']['buffer_area']:.2f}"
+mbabc_ratio = f"{(output['mbabc_8']['buffer_area'] / output['mbabc_8']['area']):.2f}"
+bc_area = f"{output['bc_83']['area']:.2f}"
+bc_buffer_area = f"{output['bc_83']['buffer_area']:.2f}"
+bc_ratio = f"{(output['bc_83']['buffer_area'] / output['bc_83']['area']):.2f}"
+
+# Show map
+m
+```
+
+These canal sections have very similar areas of `{python} mbabc_area` m^2^ (`mbabc_8`) and `{python} bc_area` m^2^ (`bc_83`). 
+
+However, because of differing shape complexity, using a standard buffer e.g., [`shape.buffer(50)`](https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoSeries.buffer.html) results in quite different buffer areas of `{python} mbabc_buffer_area` m^2^ (`mbabc_8`) and `{python} bc_buffer_area` m^2^ (`bc_83`). 
+
+For `mbabc_8`, the buffer area is approximately `{python} mbabc_ratio`× larger, but only `{python} bc_ratio`× for `bc_83`. 
+
+For most spatial queries, shape complexity isn't an important issue. In our case though, this is a problem because the magnitude of the temperature effect is partly dependent on the size of the area we are modelling for i.e., the same energy flux averaged over a larger area = a smaller temperature effect, whereas averaged over a smaller area = a larger temperature effect. 
+
+The underlying principle is that if `bc_83` and `mbabc_8` were identical in water temperature and energy storage, then they should have an identical effect on the surrounding environment in our non-spatial model. Using a standard buffer would not produce this behaviour, as different temperature effects would be produced due to modelling of different size areas (`{python} mbabc_ratio`× vs. `{python} bc_ratio`×)! 
+
+To account for this, we can use a **shape-normalised buffer**, which involves creating a circle of the same area of the canal, and then buffering by the desired amount. 
+
+![A shape-normalised buffer](images\shape-complexity-solution.png){width=60%}
+
+The advantage of this approach is that the buffered area increases linearly with the area of the canal, which is shown below for the full dataset of modelled canals in the UK and Ireland, where A shows canal area (`x`) compared to a standard buffer area (`y`), and B shows canal area (`x`) compared to a shape-normalised buffer area (`y`): 
+
+![Standard vs. shape-normalised buffers](images\buffer-shape-normalised.png){width=100%}
+
+## Changing canal area
+
+Using this approach, we can then start to investigate how changing the area of the canal influences the magnitude of the temperature effect. 
+
+Again, we will use `rc_9` as an example, re-running the model with different areas (×0.5, ×1.5, ×2.0, ×3.0). This produces the following results, which are the average daytime temperature effect across the year: 
+
+```{python}
+#| echo: false
+#| warning: false
+
+
+import glob
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+from pandas import to_datetime
+from datetime import timedelta
+
+# Load summary file of interest
+variable = "area"
+with open(f'./data/rc_9-{variable}-summary.json', 'r') as file:
+        data = json.load(file)
+
+# Localise niave datetime to aware datetime (UK) and then convert to UTC
+local_datetime = to_datetime("2022-01-01 10:00:00")\
+.tz_localize('Europe/London')\
+.tz_convert('UTC')
+
+# Create a Plotly figure, colour list
+fig = go.Figure()
+colours = ["#4daeff", "#b64dff", "#ff5d4d", "#ff7000", "#898989"]
+
+# Extract and sort keys
+key_list = data.keys()
+sorted_keys = sorted(key_list, key=lambda data: float(data[22:][:-5]))
+
+# Iterate and extract data
+for k, c in zip(sorted_keys, colours):
+  value = data[k]
+
+  # X-axis position
+  change = float(k[22:][:-5])
+
+  # Extract values
+  median = value['day values']['median']
+  ymin = abs(median - value['day values']['q1'])
+  ymax = abs(median - value['day values']['q3'])
+
+  # Add to plot
+  if change == 1:
+    fig.add_scatter(x = [change], 
+    y = [median],
+    name = f"×{change}",
+    mode='markers',
+    marker=dict(color=c),
+    error_y = dict(type = 'data', color = c,
+    symmetric = False,
+    array = [ymax],
+    arrayminus = [ymin]))
+
+  # Hide to start
+  else:
+    fig.add_scatter(x = [change], 
+    y = [median],
+    name = f"×{change}",
+    mode='markers',
+    marker=dict(color=c),
+    visible='legendonly',
+    error_y = dict(type = 'data', color = c,
+    symmetric = False,
+    array = [ymax],
+    arrayminus = [ymin]))
+
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Change in canal area (×)", yaxis_title="Air temperature effect (°C)", 
+    legend=dict(orientation="h",
+    yanchor="bottom", y=1.02,
+    xanchor="left", x=0, 
+    title = "Canal area"
+))
+
+# Save the figure as an HTML file
+fig.write_html("./images/area_effects.html")
+
+```
+
+<iframe src="./images/area_effects.html" width="100%" height="600px"></iframe>
+
+> How does canal area influence the magnitude of the effect of the surrounding air? Why might this be?
+
+
+
+
+
+
+
+
+

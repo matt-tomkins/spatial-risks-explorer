@@ -1,1 +1,4 @@
 /.quarto/
+data/config.py
+data/preparation.py
+to-do.txt

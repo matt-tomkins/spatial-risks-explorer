@@ -1,5 +1,6 @@
 project:
   type: website
+  output-dir: docs
 
 website:
   title: "GEOG70812: Local Scale Mitigation"
@@ -7,4 +8,9 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
+      - model.qmd
+      - results.qmd
+      - shading.qmd
+      - area.qmd
+      - temperature.qmd
+      - quiz.qmd

@@ -1,0 +1,144 @@
+---
+title: "Temperature"
+---
+
+> Explore the effects of changing the air temperature (test).
+
+Interpretation: increasing air temperature, increases canal temperature (surface). Not particularly insightful! 
+
+```{python}
+#| echo: false
+#| warning: false
+
+import glob
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+
+# List files of interest
+variable = "temp"
+files = glob.glob(f'./data/rc_9_excluding_{variable}*.json')
+
+# Create a Plotly figure, colour list
+fig = go.Figure()
+colours = ["#4daeff", "#b64dff", "#ff5d4d", "#ff7000"]
+
+# Iterate and load
+for f, c in zip(files, colours):
+    with open(f, 'r') as file:
+        data = json.load(file)
+
+    # Extract lists of values to plot, converting to celcius
+    modelled_water = [x['surface_water_k'] - 273.15 for x in data.values()]
+
+    # List of dict keys (unix), convert to datetime format
+    modelled_dt = list(data.keys())
+    modelled_datetime = [datetime.utcfromtimestamp(int(x)) for x in modelled_dt]
+
+    # Add trace
+    if int(f[-6]) == 0:
+        fig.add_trace(go.Scatter(x=modelled_datetime, y=modelled_water, mode='lines', 
+        line_color = c, opacity=0.5, name=f"+{f[-6]}°C"))
+
+    # Else, hide to start
+    else:
+        fig.add_trace(go.Scatter(x=modelled_datetime, y=modelled_water, mode='lines', 
+        line_color = c, opacity=0.5, visible="legendonly", name=f"+{f[-6]}°C"))
+
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Water temperature (°C)", 
+    legend_title="Air temperature",
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+
+# Save the figure as an HTML file
+fig.write_html("./images/temperature_effects.html")
+
+# fig.show()
+
+```
+
+<iframe src="./images/temperature_effects.html" width="100%" height="600px"></iframe>
+
+> How has increasing the air temperature of the environment influenced the water temperature? 
+
+In the daytime, most cooling during spring, less during summer
+
+The effect of increasing air temperature (on the effects of canals of air temperature) seems relatively small, but appears to decrease daytime cooling slightly.
+
+```{python}
+#| echo: false
+#| warning: false
+
+import glob
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+from pandas import to_datetime
+from datetime import timedelta
+
+# Load summary file of interest
+variable = "temp"
+with open(f'./data/rc_9-{variable}-summary.json', 'r') as file:
+        data = json.load(file)
+
+# Localise niave datetime to aware datetime (UK) and then convert to UTC
+local_datetime = to_datetime("2022-01-01 10:00:00")\
+.tz_localize('Europe/London')\
+.tz_convert('UTC')
+
+# Create a Plotly figure, colour list
+fig = go.Figure()
+colours = ["#4daeff", "#b64dff", "#ff5d4d", "#ff7000"]
+
+# Iterate through
+for (key, value), c in zip(data.items(), colours):
+
+    # Weekly values, ignore final entry
+    day_medians = value['weekly values']['day medians'][:-1]
+    night_medians = value['weekly values']['night medians'][:-1]
+
+    # Create list of datetimes for x-axis
+    dt = [local_datetime + timedelta(days = 3 + (7 * n)) for n in range(0, len(day_medians))]
+
+    # Add trace
+    if int(key[-6]) == 0:
+        fig.add_trace(go.Scatter(x=dt, y=day_medians, mode='lines', 
+        line_color = c, opacity=0.5, name=f"+{key[-6]}°C"))
+
+    # Else, hide to start
+    else:
+        fig.add_trace(go.Scatter(x=dt, y=day_medians, mode='lines', 
+        line_color = c, opacity=0.5, visible="legendonly", name=f"+{key[-6]}°C"))
+
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Air temperature (°C)", 
+    legend=dict(orientation="h",
+    yanchor="bottom", y=1.02,
+    xanchor="left", x=0, 
+    title = "Air temperature change"
+))
+
+
+
+# Save the figure as an HTML file
+fig.write_html("./images/air_temperature_effects.html")
+
+# fig.show()
+
+```
+
+<iframe src="./images/air_temperature_effects.html" width="100%" height="600px"></iframe>
+
+When it comes to warming water, solar intensity plays a significantly greater role than air temperature, as the direct absorption of sunlight by the water surface is the primary driver of heat gain, while air temperature primarily affects heat transfer through convection, which is usually less impactful than the direct solar radiation absorption. (AI)
+
+See https://doi.org/10.2166/nh.2021.148
+
+Ultimately, air temperature likely to have a small effect (convection).
+
+Not 100% sure on this... but whatever

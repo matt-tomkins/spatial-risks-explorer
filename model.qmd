@@ -1,0 +1,265 @@
+---
+title: "Model"
+---
+
+## Inputs
+
+The model is based on the characteristics of the canal:
+
+- area 
+- depth
+
+The weather:
+
+- temperature
+- humidity
+- wind speed
+- cloud cover
+
+The characteristics of the environment:
+
+- degree of shading
+- solar input
+
+## Approach
+
+It begins by creating inital temperatures and energy values for layers of the water column, then models these through time based on different energy exchanges (convective, radiative, conductive).
+
+
+## Validation
+
+> "All models are wrong, but some are useful"
+>
+> -- <cite>George Box</cite>
+
+> "Truth is much too complicated to allow anything but approximations."
+>
+> -- <cite>John von Neumann</cite>
+
+For validation, we have some data from Canal and River Trust. Talk about this in more detail... 
+
+> Have a look at it...
+
+TO DO: pop-ups with data? Add marker for monitoring station
+
+```{python}
+#| echo: false
+
+# Source: https://www.riannek.de/2022/gpx-to-geopandas/
+import folium
+import os
+import json
+from geopandas import read_file, GeoDataFrame
+from pandas import concat
+from folium.plugins import GroupedLayerControl
+
+# Load canals data
+with open('./data/lalc_canals-4326.geojson', 'r') as f:
+    data = json.load(f)
+
+# Load buildings data
+with open('./data/lalc_73-buildings-4326.geojson', 'r') as f:
+    buildings = json.load(f)
+
+# Extract data and init dict
+#canals = data['features']
+#buildings = b['features']
+
+# Canal name
+id = "lalc_73"
+
+extract = data['features']
+
+# Filter based on canal names
+filtered = [geo for geo in extract if geo['properties']['code_id'] == id]
+excluded = [geo for geo in extract if geo['properties']['code_id'] != id]
+
+# Convert to GeoJSON feature collection format
+filtered_dict = {
+    "type": "FeatureCollection",
+    "name": id,
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": filtered}
+excluded_dict = {
+    "type": "FeatureCollection",
+    "name": f"not-{id}",
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": excluded}
+
+# Create map
+m = folium.Map(location=(53.472648,-2.241951), zoom_start=11, 
+                tiles="Cartodb Positron")
+
+# Add canals
+folium.GeoJson(filtered_dict, style_function=lambda feature: {
+"fillColor": "#72b4f9",
+"color": "#2b5d93"}, name="Canals",
+zoom_on_click=True).add_to(m)
+
+# Add buildings
+folium.GeoJson(buildings, style_function=lambda feature: {
+"fillColor": "#b6b6b6",
+"color": "#505050",
+"weight": 1}, name=f"Buildings",
+zoom_on_click=True).add_to(m)
+
+# Fit to map content
+folium.FitOverlays().add_to(m)
+
+# Add other canals
+folium.GeoJson(excluded_dict, style_function=lambda feature: {
+    "fillColor": "#d6e7f9",
+    "color": "#85add6"}, name="Neighbouring canals",
+    zoom_on_click=True).add_to(m)
+
+# Add layer control
+folium.LayerControl().add_to(m)
+
+# Show map
+m
+
+```
+
+We can now compare our measured data compared to the modelled data
+
+> Have a look at it...
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+from pandas import read_csv
+from numpy import quantile
+from statistics import median
+
+# Dictionary of CRT wT monitoring locations and corresponding canal ids
+location_dict = {'tamc_19' : 'Anderton Waste Weir Flow Water Temperature C (All Data) (Value)', 
+                    'lalc_73' : 'Bridge Pagefield Pipe Crossing Mean Temperature C (All Data) (Value)',
+                    'nabc_2' : 'Bridge 15 Chain Lane Bridge Mean Temperature C (All Data) (Value)',
+                    'suc_41' : 'New Road Bridge 148 Mean Temperature C (All Data) (Value)',
+                    'rc_103' : 'Bridge 46 Benthouse Bridge Mean Temperature C (All Data) (Value)',
+                    'cc3_60' : 'Hawkesbury Lock Mean Temperature C (All Data) (Value)',
+                    'batc_14' : 'Bridge 32. Priorswood Mean Temperature C (All Data) (Value)', 
+                    'hc_53' : 'Bridge 4 Wakefield Road Bridge Mean Temperature C (All Data) (Value)',
+                    'lalc_4' : 'Bridge C Lightbody Street Mean Temperature C (All Data) (Value)',
+                    'cc3_11' : 'Bridge 73 Anchor Bridge Mean Temperature C (All Data) (Value)',
+                    'cc3_53' : 'Bridge 40 Taverners Bridge Mean Temperature C (All Data) (Value)'}
+
+# Canal ID for validation
+canal_id = "lalc_73"
+
+# Load modelled data
+with open(f'./data/model-output-{canal_id}.json', 'r') as f:
+    modelled_data = json.load(f)
+
+# Load measured data
+measured_data = read_csv(f"./data/model_validation_{canal_id}.csv")
+
+# Return value, corresponding to selected id
+location = location_dict[canal_id]
+
+# Extract measured temperatures and datetimes
+measured_water = measured_data[['dt', location]]
+measured_water = measured_water.dropna()
+
+# Convert from string to datetime
+dt = [datetime.strptime(x, '%d/%m/%Y %H:%M') for x in measured_water['dt']]
+
+# Convert to unix 
+dt_unix = [str(int(x.timestamp())) for x in dt]
+
+# Measured dictionary
+measured_dict = dict(zip(dt_unix, measured_water[location]))
+
+# Extract lists of values to plot, converting to celcius
+modelled_water = [x[f'depth_water_{40}'] - 273.15 for x in modelled_data.values()]
+
+# Init dictionary to store residuals
+residual_dict = {}
+
+# Iterate through the modelled unix times
+for key, value in modelled_data.items():
+
+    # If this unix time exists in the measured dictionaru
+    if key in measured_dict:
+        
+        try: 
+
+            # Calculate the residual, converting from K to celcius
+            res = (value[f'depth_water_{40}'] - 273.15) - measured_dict[key]
+
+        # EAFP: surface layer
+        except KeyError:
+
+            # Calculate the residual, converting from K to celcius
+            res = (value[f'surface_water_k'] - 273.15) - measured_dict[key]
+
+        # Add to residual dictionary
+        residual_dict[key] = res
+
+# Extract datetimes and values
+residual_dt = list(residual_dict.keys())
+residual_datetime = [datetime.utcfromtimestamp(int(x)) for x in residual_dt]
+residual_temp = [x for x in residual_dict.values()]
+
+# Absolute
+abs_residual = [abs(x) for x in residual_temp]
+med = f"{median(abs_residual):.2f}°C"
+p25 = f"{quantile(abs_residual, 0.25).item():.2f}°C"
+p75 = f"{quantile(abs_residual, 0.75).item():.2f}°C"
+
+# List of dict keys (unix), convert to datetime format
+modelled_dt = list(modelled_data.keys())
+modelled_datetime = [datetime.utcfromtimestamp(int(x)) for x in modelled_dt]
+
+# Create figure
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=modelled_datetime, y=modelled_water, mode='lines', 
+line_color = "#FFB16F", opacity=0.75, name='Modelled water'))
+
+fig.add_trace(go.Scatter(x=dt, y=measured_water[location], mode='lines', 
+line_color = "#707070", opacity=0.75, name='Measured water'))
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Temperature (°C)", 
+    legend_title="Legend",
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+
+
+# Save the figure as an HTML file
+fig.write_html("./images/model_validation.html")
+
+```
+
+<iframe src="./images/model_validation.html" width="100%" height="600px"></iframe>
+
+> How well do you think the model is performing? 
+
+```{python}
+#| echo: false
+#| warning: false
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=modelled_datetime, y=residual_temp, mode='lines', 
+line_color = "#FFB16F", opacity=0.75, name='Residual'))
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Temperature difference (°C)", 
+    legend_title="Legend",
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+
+# Save the figure as an HTML file
+fig.write_html("./images/model_residual.html")
+
+```
+
+<iframe src="./images/model_residual.html" width="100%" height="300px"></iframe>
+
+The mean absolute residual is `{python} med`, with p25 of `{python} p25` and p75 of `{python} p75`.  
+
+> What factors might account for under- or over-prediction of water temperature? Consider the inputs, model assumptions... 
