@@ -115,6 +115,10 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="./quiz.html"> 
 <span class="menu-text">Quiz</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./more.html"> 
+<span class="menu-text">Extra</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -149,23 +153,25 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<p>Another key input for the model is weather data, as discussed <a href="./model.html">here</a>.</p>
+<p>Alongside wind speed (m/s), humidity (%), and cloud cover (%), the temperature of the air (°C) can play a key role in water energy balance, influencing the rate of evaporation and convection.</p>
+<p>With global surface temperature reaching 1.1°C above the 1850-1900 baseline in 2011-2020 (IPCC, <a href="https://www.ipcc.ch/report/ar6/syr/summary-for-policymakers/">2024</a>) and projected to increase further under various emission scenarios, how will rising temperatures affect canals?</p>
 <blockquote class="blockquote">
-<p>Explore the effects of changing the air temperature (test).</p>
+<p>Explore the plot below, which shows modelled water temperatures for the base model (0°C) and for models run with simulated higher temperatures (+1°C, +2°C, +3°C). How does this affect water temperature?</p>
 </blockquote>
-<p>Interpretation: increasing air temperature, increases canal temperature (surface). Not particularly insightful!</p>
 <iframe src="./images/temperature_effects.html" width="100%" height="600px">
 </iframe>
+<p>In the following plot, we can investigate the effects of the above changes on air temperatures, where the <code>y</code> axis shows the change in air temperature acorss the year for a single canal section (<code>rc_9</code>), aggregated weekly.</p>
 <blockquote class="blockquote">
-<p>How has increasing the air temperature of the environment influenced the water temperature?</p>
+<p>How has increasing the <em>input</em> air temperature (+1°C, +2°C, +3°C) influenced the modelled air temperature across the year? Increased or diminished cooling?</p>
 </blockquote>
-<p>In the daytime, most cooling during spring, less during summer</p>
-<p>The effect of increasing air temperature (on the effects of canals of air temperature) seems relatively small, but appears to decrease daytime cooling slightly.</p>
+<blockquote class="blockquote">
+<p>What is the magnitude of the change?</p>
+</blockquote>
 <iframe src="./images/air_temperature_effects.html" width="100%" height="600px">
 </iframe>
-<p>When it comes to warming water, solar intensity plays a significantly greater role than air temperature, as the direct absorption of sunlight by the water surface is the primary driver of heat gain, while air temperature primarily affects heat transfer through convection, which is usually less impactful than the direct solar radiation absorption. (AI)</p>
-<p>See https://doi.org/10.2166/nh.2021.148</p>
-<p>Ultimately, air temperature likely to have a small effect (convection).</p>
-<p>Not 100% sure on this… but whatever</p>
+<p>Based on the above, <a href="#weather-section">solar radiation</a> and the degree of shading appears to play a more significant role in changing water and air temperatures (e.g., Shinohara et al.&nbsp;<a href="https://doi.org/10.2166/nh.2021.148">2021</a>) than <em>input</em> air temperature changes alone.</p>
+<p>Within this context, the changing degree of shading (e.g., building construction) might be expected to have a more noticable impact on canal-air temperature effects, than future climate change. A hypothesis to be explored further…</p>
 
 
 

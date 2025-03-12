@@ -3,9 +3,81 @@ project: website
 format: html
 ---
 
-Introductory text, describing the overall context. 
+## Growth
 
-> Explore Manchester's canal network below, and the buildings within 100 m. 
+Canals played a central role in Britain's industrialisation, and the growth of Manchester as the world's first industrial city. Canals were:
+
+> "the most spectacular and typical innovations of this period"
+>
+> -- <cite>Phyllis Dean, The First Industrial Revolution</cite>
+
+Prior to the advent of canals (and later, the railways), economic production and population were widely dispersed in small "craft-based units and settlements" ([Turnball, 1987](https://doi.org/10.2307/2596392)), with the balance of economic activity favouring the south of England (e.g., London).
+
+The development of canals enabled transport of fuel (coal), access to raw materials, and movement of manufactured goods (e.g., cotton), all of which contributed to industrialisation and population growth, and concentration of activities in rapidly developing urban areas, especially in the north-west of England. 
+
+![Bailey Bridge, Manchester (1912) -- Adolphe Valette (1876–1942)](images\bailey-bridge.jpg){width=40%}
+
+The first canal in Manchester was opened in 1761 (the Dukes Canal, part of the Bridgewater Canal today) and coincided with massive population growth, from less than ~20,000 people in 1750, to nearly 77,000 in 1801, 316,000 in 1851, and over 2 million by 1901 ([Douglas et al. 2002](https://doi.org/10.1016/S0921-8009(02)00029-0)). From a predominantly rural population in 1600 (~7.7%), more than half of the population of England and Wales were living in larger settlements (>2,500 residents) by 1851 ([de Vries, 2013](https://doi.org/10.4324/9780203716526)). Alongside other key developments, such as utilisation of steam power, development of manufacturing, and the agricultural revolution, canals were an important driver of the transformation of British society and its landscape from the 18th Century onwards, although not always for the better:
+
+> “Since the Reform Act of 1832 the most important social issue in England has been the condition of the working classes, who form the vast majority of the English people… What is to become of these propertyless millions who own nothing and consume today what they earned yesterday?… The English middle classes prefer to ignore the distress of the workers and this is particularly true of the industrialists, who grow rich on the misery of the mass of wage earners.”
+>
+> -- <cite>Friedrich Engels, The Condition of the Working Class in England in 1844, pp. 25–26.</cite>
+
+![A Manufacturing Town (1922) -- Laurence Stephen Lowry (1887–1976)](images\a-manufacturing-town.jpg){width=60%}
+
+If you are interested in the history of the canals and related issues (e.g., population growth, mortality), I would recommend the following sources:
+
+- Turnbull, G., [1987](https://doi.org/10.2307/2596392). Canals, coal and regional growth during the industrial revolution. The Economic History Review, 40(4), pp.537-560. 
+- Douglas, I., Hodgson, R. and Lawson, N., [2002](https://doi.org/10.1016/S0921-8009(02)00029-0). Industry, environment and health through 200 years in Manchester. Ecological Economics, 41(2), pp.235-255.
+- Davenport, R.J., [2020](https://doi.org/10.1111/ehr.12964). Urbanization and mortality in Britain, c. 1800–50. The Economic History Review, 73(2), pp.455-485.
+
+The [Science and Industry Museum](https://www.scienceandindustrymuseum.org.uk/objects-and-stories/worlds-first-industrial-city) is also highly recommended. 
+
+## Decline
+
+While canals played a critical role in the growth of Manchester, they declined in importance from the mid-19th Century, partly driven by the growth of railways and their "annihilation of space and time" (Schivelbusch, [2014](https://www.jstor.org/stable/10.1525/j.ctt6wqbk7)):
+
+> "Economically, the railways' operation ... causes distances to diminish ... Lille suddenly finds itself transported to Louvres; Calais to Pontoise; Ie Havre to Poissy ..."
+>
+>-- <cite>Constantin Pecqueur, 1839</cite>
+
+![Competition from railways was one of the key factors hastening the decline of inland waterways](images\oxenholme.png){width=100%}
+
+The 20th Century [marked the end](https://canalrivertrust.org.uk/things-to-do/canal-history/history-features-and-articles/the-decline-of-the-canals) of the canal transport industry. However, the canal infrastructure is still present, with over 2000 miles of canals in England and Wales managed by the [Canal and River Trust](https://canalrivertrust.org.uk/canals-and-rivers) (see its [history](https://canalrivertrust.org.uk/canals-and-rivers/our-history)), plus canals managed by other entities elsewhere (e.g., the Bridgewater Canal by [Peel L&P](https://bridgewatercanal.co.uk/about-us/); in Scotland by [Scottish Canals](https://www.scottishcanals.co.uk/)). 
+
+Although no longer important for transport, the canal network is still important for urban life:
+
+> "Today, our canals and rivers are loved, used and enjoyed every day by millions of people. We bring nature, wildlife and history to the doorstep for more than five million people. We give hundreds of thousands of runners, cyclists and dog walkers safe spaces to enjoy. These living, breathing waterways transform places and enrich our lives."
+>
+>-- <cite>The Canal and River Trust</cite>
+
+Today, around ~5.4 million people live within 1 km (~15 minutes' walk from home) of the urban canal network in the UK, with a further ~280,000 in Ireland[^1]. 
+
+[^1]: Analysis based on a simple 1 km buffer of the urban canal network, compared to gridded population data for the UK (Reis et al. [2017](https://doi.org/10.5285/0995e94d-6d42-40c1-8ed4-5090d82471e1)) and Ireland (Census, [2011](https://www.cso.ie/en/census/census2011griddataset/))
+
+## Urban climate
+
+However, one aspect that hasn't been explored previously is the effects of canals on urban climate. Do canals cool, warm or have no effect on urban temperatures? 
+
+Rising average temperatures (IPCC [AR6](https://www.ipcc.ch/report/ar6/syr/summary-for-policymakers/)), more frequent and intense heatwaves (Perkins et al. [2012](https://doi.org/10.1029/2012GL053361)), and the urban heat island (UHI) effect (Rizwan et al. [2008](https://doi.org/10.1016/S1001-0742(08)60019-4)), all have consequences for the health of urban populations. Local-scale adaptations, such as expansion or modification of greenspace, bluespace, or other aspects of urban design (e.g., building materials, albedo), can be used to mitigate against rising temperatures. 
+
+In today's practical, we are going to explore a model that I developed alongside Dr. Harry Mcdonald (Engineering), Prof. Jonny Huck (Geography), and Prof. Joanne Tippett (Planning), plus support from the Canal and River Trust and generously supported thanks to funds raised by players of People’s Postcode Lottery, to investigate the effects of canals on urban temperatures.
+
+The model and accompanying paper are not yet available, although you can read a conference article describing the model [here](https://research.manchester.ac.uk/en/publications/modelling-the-cooling-effects-of-urban-canals). 
+
+Unfortunately, the model is quite complex in structure and is *relatively* slow to run due to the scale of the analysis (i.e., modelling all of the urban canals in Great Britain and Ireland for the entirety of 2022 at 15-minute intervals), which precludes running the model within the practical. 
+
+Instead, we're going to explore the model approach, considering the structure, [validation](model.qmd) and [initial results](results.qmd), focusing on the canals of Manchester. We'll also explore the sensitivity of the model to changing inputs, including the degree of [shading](shading.qmd) by nearby buildings and [canal area](area.qmd), and model performance under [changing climate](temperature.qmd).
+
+This practical contains interactive maps and plots for you to explore and questions to reflect on, which are denoted by the following formatting:
+
+> This is an instruction.
+
+To finish, there is a short formative [quiz](quiz.qmd) to test your knowledge as well as some additional tasks if you are interested in exploring this theme [further](more.qmd).
+
+> To begin, explore Manchester's canal network, and the nearby building geometries, which are one of the important model inputs. 
+
+> How far do you live from the nearest canal?
 
 ```{python}
 #| echo: false
@@ -16,7 +88,7 @@ import os
 import json
 from geopandas import read_file, GeoDataFrame
 from pandas import concat
-from folium.plugins import GroupedLayerControl
+from folium.plugins import GroupedLayerControl, MeasureControl
 
 # Load canals data
 with open('./data/manchester-canals-4326.geojson', 'r') as f:
@@ -93,12 +165,10 @@ folium.FitOverlays().add_to(m)
 # Add layer control
 folium.LayerControl().add_to(m)
 
+# Add measurement control
+m.add_child(MeasureControl())
+
 # Show map
 m
 
 ```
-
-
-In today's practical, we're going to explore the model, considering its structure, [validation](model.qmd) and [initial results](results.qmd). We'll also explore the sensitivity of the model to changing inputs, including the degree of [shading](shading.qmd) and [canal area](area.qmd), and model performance under [changing climate](temperature.qmd).
-
-To finish, there is a short formative [quiz](quiz.qmd) to test your knowledge.

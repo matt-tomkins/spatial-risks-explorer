@@ -4,29 +4,187 @@ title: "Model"
 
 ## Inputs
 
-The model is based on the characteristics of the canal:
+Although we are not running the model today, it is important to understand the data that are used as model inputs.
 
-- area 
-- depth
+### Canals
 
-The weather:
+The model is run on the urban canal network, which is extracted from the Ordnance Survey [MasterMap Topography layer](https://www.ordnancesurvey.co.uk/products/os-mastermap-topography-layer). Waterways were extracted and filtered to urban areas, and the key attributes used in the model are:
 
-- temperature
-- humidity
-- wind speed
-- cloud cover
+- the area of each *continguous* canal section e.g., separated by locks or bridges. 
+- the depth of each section, based on published canal [draughts](https://canalrivertrust.org.uk/boating/go-boating/planning-your-boat-route/waterway-dimensions#maximum-craft-dimensions) i.e., the  vertical distance between the waterline and the lowest part of the hull, a minimum required water depth for safe navigation.
 
-The characteristics of the environment:
+> Can you think of any issues with these attributes?
 
-- degree of shading
-- solar input
+![Castlefield canal. [Source](https://www.successtours.com/tours/cultural-heritage-manchester)](images/castlefield-canal.png){width=100%}
+
+### Environment
+
+Alongside canal attributes, *some* characteristics of the environment are also included, such as:
+
+- the degree of shading of the canal by nearby buildings, also obtained from the [MasterMap Topography layer](https://www.ordnancesurvey.co.uk/products/os-mastermap-topography-layer). As the model is run, the shading proportion of the canal is modelled at each time step i.e., is it fully, partially or not shaded?  
+
+For example, here is an output for a feature of the Worcester and Birmingham canal (`wabc_38`) at 2022-06-10 (19:45:00). At this time step, the canal is 22% shaded:
+
+![Example of shading results for a feature of the Worcester and Birmingham canal. Buildings are extracted within a set distance of the canal and then filtered based on the solar azimuth for that datetime. Shading geometries are modelled and the shading proportion calculated (0.22).](images/shadows-for-wabc_38-at-06_10-19_45_00_EDIT.png){width=50%}
+
+> What characteristics of the environment are missing from the model?
+
+### Weather and radiation {weather}
+
+To predict the effects of the canals on surrounding air temperature, the analysis first models changing water temperature and energy storage through time. This is based on weather parameters from [OpenWeather](https://openweathermap.org/), including:
+
+- temperature (°C)
+- humidity (%)
+- wind speed (m/s)
+- cloud cover (%)
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+
+# Example data
+with open('./data/example-weather-data.json', 'r') as c:
+    climate = json.load(c)
+
+# List of dict keys (unix), convert to datetime format
+clim_dt = list(climate.keys())
+clim_datetime = [datetime.utcfromtimestamp(int(x)) for x in clim_dt]
+
+# Colours for plotting
+colours = ["#ffb83c", "#999999", "#00a061", "#c82700"]
+
+# Create a Plotly figure
+fig = go.Figure()
+
+# Iterate
+for parameter, c, label in zip(["air_temperature", "cloud_cover", "wind_speed", "humidity"], colours, ["°C", "%", "m/s", "%"]):
+
+    # Extract values and plot
+    if parameter == "air_temperature":
+        data = [x[parameter] - 273.15 for x in climate.values()]
+        # Add to plot
+        fig.add_trace(go.Scatter(x=clim_datetime, y=data, mode='lines', 
+        line_color = c, opacity=0.5, name=f"{parameter} ({label})"))
+    
+    # Extract values but hide
+    else: 
+        data = [x[parameter] for x in climate.values()]
+        # Add to plot
+        fig.add_trace(go.Scatter(x=clim_datetime, y=data, mode='lines', 
+        line_color = c, opacity=0.5, name=f"{parameter} ({label})", 
+        visible='legendonly'))
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Variable", 
+    title=dict(text="Example climate data"),
+    legend=dict(orientation="h",
+    yanchor="bottom", y=-0.4,
+    xanchor="left", x=0, 
+    title = "Variable"
+))
+
+# Save the figure as an HTML file
+fig.write_html("./images/climate-example.html")
+
+# Optionally, display the plot inline
+# fig.show()
+
+```
+
+<iframe src="./images/climate-example.html" width="100%" height="400px"></iframe>
+
+> Have a look at the data provided by [OpenWeather](https://openweathermap.org/history-bulk). Can you think of any limitations with this data source? 
+
+Incoming solar radiation (W/m^2^) is also modelled for each time step, based on the canal location, solar altitude, and cloud cover. Below is an example of the solar radiation values for central Manchester (53.477, -2.244; excluding cloud cover) for a 10-day period from 2022-06-01:
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+
+# Example data
+with open('./data/solar-radiation.json', 'r') as c:
+    radiation = json.load(c)
+
+# List of dict keys (unix), convert to datetime format
+radiation_dt = list(radiation.keys())
+radiation_datetime = [datetime.utcfromtimestamp(int(x)) for x in radiation_dt]
+
+# Colours for plotting
+colours = ["#c82700", "#00a061"]
+
+# Create a Plotly figure
+fig = go.Figure()
+
+# Iterate
+for parameter, c, label in zip(["intensity", "altitude"], colours, [f"W/m^2", "°"]):
+
+    # Extract values and plot
+    if parameter == "intensity":
+        data = [x[parameter] for x in radiation.values()]
+        # Add to plot
+        fig.add_trace(go.Scatter(x=radiation_datetime, y=data, mode='lines', 
+        line_color = c, opacity=0.5, name=f"{parameter} ({label})"))
+    
+    # Extract values but hide
+    else: 
+        data = [x[parameter] for x in radiation.values()]
+        # Add to plot
+        fig.add_trace(go.Scatter(x=radiation_datetime, y=data, mode='lines', 
+        line_color = c, opacity=0.5, name=f"{parameter} ({label})", 
+        visible='legendonly'))
+
+# Axis labels
+fig.update_layout(
+    xaxis_title="Date", yaxis_title="Variable", 
+    title=dict(text="Solar radiation parameters"),
+    legend=dict(orientation="h",
+    yanchor="bottom", y=-0.4,
+    xanchor="left", x=0, 
+    title = "Variable"
+))
+
+# Save the figure as an HTML file
+fig.write_html("./images/solar-radiation-example.html")
+
+# Optionally, display the plot inline
+#fig.show()
+
+```
+
+<iframe src="./images/solar-radiation-example.html" width="100%" height="400px"></iframe>
 
 ## Approach
 
-It begins by creating inital temperatures and energy values for layers of the water column, then models these through time based on different energy exchanges (convective, radiative, conductive).
+Based on the above inputs, water temperatures are modelled incorporating evaporative, sensible (conductive and convective) and radiative (sunlight and thermal) heat fluxes between the water and the outside environment. Some heat fluxes that *aren't* included are heat flux due to friction ($Q_{fc}$) or the advective heat flux ($Q_a$), which you can read about in Webb and Zhang ([1997](https://doi.org/10.1002/(SICI)1099-1085(199701)11:1%3C79::AID-HYP404%3E3.0.CO;2-N)).
 
+> Why have these heat fluxes been excluded from the model?
+
+To model these fluxes, the water column is split into different layers and at each time step, fluxes of energy are modelled between each layer and between the water surface and the surrounding environment. This is quite complicated. 
+
+![Schematic of the model structure](images/model-schematic.png){width=80%}
+
+To complicate matters further, modelling of water (and its effects) is only one part of the model, which also considers the temperature and energy storage of a **reference** surface. 
+
+This is necessary because we need a baseline for comparison. The canal might have an effect on the surrounding air temperature (i.e., cooling or warming by *x*°C), but how do we assess the significance of this effect without comparing it to other materials e.g., concrete, asphalt, greenspace?
+
+In our model, we use concrete as the reference material, which is a reasonable assumption for an urban environment, and could be the ultimate fate of some of our canals, an example below:
+
+![The former Kendal canal](images/kendal-canal.jpg){width=60%}
 
 ## Validation
+
+While the model is quite complex and every effort has been made to represent the key processes involved, it doesn't mean it's correct! Before we can use the model, we need to assess its performance and should remember that:
 
 > "All models are wrong, but some are useful"
 >
@@ -36,12 +194,9 @@ It begins by creating inital temperatures and energy values for layers of the wa
 >
 > -- <cite>John von Neumann</cite>
 
-For validation, we have some data from Canal and River Trust. Talk about this in more detail... 
+With those caveats, we can go ahead and assess the validity of the model using water temperature data provided by the Canal and River Trust, which is available for a small number of sites across England and Wales. 
 
-> Have a look at it...
-
-TO DO: pop-ups with data? Add marker for monitoring station
-
+> One of those sites is on the Liverpool and Leeds Canal (feature `lalc_73`), which you can inspect below.
 ```{python}
 #| echo: false
 
@@ -67,6 +222,10 @@ with open('./data/lalc_73-buildings-4326.geojson', 'r') as f:
 
 # Canal name
 id = "lalc_73"
+
+# Monitoring station
+lat = 53.548425
+lon = -2.649735
 
 extract = data['features']
 
@@ -103,6 +262,13 @@ folium.GeoJson(buildings, style_function=lambda feature: {
 "weight": 1}, name=f"Buildings",
 zoom_on_click=True).add_to(m)
 
+# Add marker
+folium.Marker(
+    location=[lat, lon],
+    popup="Bridge Pagefield Pipe Crossing",
+    icon=folium.Icon(color="green"),
+).add_to(m)
+
 # Fit to map content
 folium.FitOverlays().add_to(m)
 
@@ -120,9 +286,11 @@ m
 
 ```
 
-We can now compare our measured data compared to the modelled data
+<br>
 
-> Have a look at it...
+Shown below is a comparison of the measured water temperatures (CRT) and the modelled water temperatures.
+
+> Inspect the plot. What is your appraisal of model performance?
 
 ```{python}
 #| echo: false
@@ -238,13 +406,15 @@ fig.write_html("./images/model_validation.html")
 
 <iframe src="./images/model_validation.html" width="100%" height="600px"></iframe>
 
-> How well do you think the model is performing? 
+We can also calculate model residuals ($modelled - measured$), as shown below:
+
+> How does model performance vary across the year? 
 
 ```{python}
 #| echo: false
 #| warning: false
 fig = go.Figure()
-fig.add_trace(go.Scatter(x=modelled_datetime, y=residual_temp, mode='lines', 
+fig.add_trace(go.Scatter(x=residual_datetime, y=residual_temp, mode='lines', 
 line_color = "#FFB16F", opacity=0.75, name='Residual'))
 
 # Axis labels
@@ -260,6 +430,6 @@ fig.write_html("./images/model_residual.html")
 
 <iframe src="./images/model_residual.html" width="100%" height="300px"></iframe>
 
-The mean absolute residual is `{python} med`, with p25 of `{python} p25` and p75 of `{python} p75`.  
+Using the above data, we can calculate some simple summary statistics, such as the mean absolute residual ($abs(modelled-measured)$) which is `{python} med`, with *p*25 of `{python} p25` and *p*75 of `{python} p75`.  
 
 > What factors might account for under- or over-prediction of water temperature? Consider the inputs, model assumptions... 

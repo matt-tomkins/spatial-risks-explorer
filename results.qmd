@@ -3,8 +3,12 @@ title: "Results"
 ---
 
 ## Water temperature 
-Plot of water temperature results (including shading)
 
+Now that we've considered model validation, we can start to delve into some of the initial results.
+
+> Inspect the plot below, which shows variability in water temperature through time, as well as the air temperature (input). 
+
+> How are air and water temperatures changing throughout the year?
 
 ```{python}
 #| echo: false
@@ -64,10 +68,17 @@ fig.write_html("./images/measured_air_modelled_water_temperature.html")
 
 <iframe src="./images/measured_air_modelled_water_temperature.html" width="100%" height="400px"></iframe>
 
-
-> How are air and water temperatures changing throughout the year?
-
 ## Effects on air temperature 
+
+While modelling changing water temperature is interesting, our main focus is modelling the effects of changing water temperature (and energy storage) on the surrouding air temperature i.e., are canals cooling, warming or having no effect?
+
+Included below is a plot of the effects of canals in Manchester on air temperatures during the **daytime** for the entirety of 2022 (`x`). The `y` axis shows the effect on air temperature, where negative values denote cooling of the air, and positive values denote warming of the air. Note: these values are relative to the reference material (concrete) as discussed previously.
+
+> Inspect the results, which show the median, *p*25, and *p*75 values. These can be aggregated by month, fortnight and week.
+
+> Are canals having a cooling or warming effect during the daytime? 
+
+> How does this vary seasonally?
 
 ```{python}
 #| echo: false
@@ -173,11 +184,21 @@ fig.write_html("./images/seasonal_effects_day.html")
 
 <iframe src="./images/seasonal_effects_day.html" width="100%" height="400px"></iframe>
 
-2022 was the warmest year on record in the UK, in series stretching back to 1884 ( Kendon et al. [2023](https://doi.org/10.1002/joc.8167)) and 1659 (Manley et al. [1974](https://doi.org/10.1002/qj.49710042511)), with the summer period marked by extreme heatwaves on 15–17 June, 17–19 July and 9–15 August. Of these, the 17–19 July heatwave resulted in the UK’s highest ever recorded temperature, at 40.3°C (Witze [2024](https://doi.org/10.1038/d41586-024-00074-z)). 
+<br>
 
-> Is there evidence of these heatwaves in the series? What does this do to air temperature?
+The results above are based on analysis of 2022, which is still the warmest year on record in the UK (10.94°C), in series stretching back to 1884 (Kendon et al. [2023](https://doi.org/10.1002/joc.8167)) and 1659 (Manley et al. [1974](https://doi.org/10.1002/qj.49710042511)).
 
-As above, but here showing the effects at night.
+During the summer, there were also extreme heatwaves on 15–17 June, 17–19 July and 9–15 August. Of these, the 17–19 July heatwave resulted in the UK’s highest ever recorded temperature, at 40.3°C (Witze [2024](https://doi.org/10.1038/d41586-024-00074-z)). 
+
+> Is there any of evidence of these heatwaves in the above plots? What does this do to the effects of canals on air temperature?
+
+While daytime effects are important, **nighttime** effects also need to be considered, for example due to the impacts of nighttime heat stress on human health (e.g., Sarangi et al. [2021](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2021GL095678))
+
+> Inspect the plot below, which showcases nighttime effects. 
+
+> Are canals having a cooling or warming effect during the nighttime? 
+
+> How does this vary seasonally? Why?
 
 ```{python}
 #| echo: false
@@ -283,15 +304,12 @@ fig.write_html("./images/seasonal_effects_night.html")
 
 <iframe src="./images/seasonal_effects_night.html" width="100%" height="400px"></iframe>
 
-> What effect do canals have an overnight temperatures? How does this change seasonally? 
+## Summary
 
-## Key results
+Before moving on to the next section, ensure you have reflected on:
 
-Canals have a cooling effect during the day
+> The effects of canals on air temperatures during the day and night
 
-Canals have a warming effect during the night
+> How these effects vary seasonally
 
-Pronounced during spring
-
-Reduced, but still important during summer
 

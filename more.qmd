@@ -1,0 +1,148 @@
+---
+title: "Extra"
+format: html
+---
+
+## A little bit more? 
+
+If you've been through the practical and want to explore the model further, one thing we might want to reflect on is the **accuracy** of our shading calculations. Ultimately, the overall model accuracy is dependent on the quality of the input data, which includes:
+
+- the canal geometries and depths 
+- the building geometries and heights, and the modelled shadows cast by those buildings
+- the input weather data, sourced from [OpenWeather](https://openweathermap.org/)
+
+In our model, we use an existing package called [pybdshadow](https://pybdshadow.readthedocs.io/en/latest/index.html), designed specifically for generating building shadows, and utilise building geometries (footprints, heights) from the Ordnance Survey [MasterMap Topography layer](https://www.ordnancesurvey.co.uk/products/os-mastermap-topography-layer) for modelling. This is run every 15-minutes for the entirety of 2022 and allows us to estimate the proportion of the canal which is shaded at each interval (i.e., 0 = unshaded, 1 = entirely shaded).
+
+Here is an example of those changing shadows through time:
+
+![Shadows cast by buildings around the Rochdale Canal (01-06-2022)](images\shadows-for-rc_9.gif){width=60%}
+
+To investigate the typical outputs, you can download the canal geometry for one feature of the Ashton Canal (`ac1_6`), the nearby building geometries, and the shadows produced at a specific datetime (`2022-01-01 09:45:00`). These data can be downloaded [here](https://livemanchesterac-my.sharepoint.com/:f:/g/personal/matthew_tomkins_student_manchester_ac_uk/EqKK3_42x1dGrZq1IR_FWSIBHeT4Fs2FVkHr2IQrJizIIg?e=N7Ffms). [Note: shadows are only produced for buildings in the solar direction, for computational efficiency]
+
+```{python}
+#| echo: false
+
+# ShadeApp output: https://shademap.app/@53.48025,-2.22222,16.00077z,1735724716321t,0b,0p,0m!1735719966854!1735747267074# 
+
+# SunCalc: https://www.suncalc.org/#/53.4794,-2.2221,17/2022.01.01/09:45/27.5/3
+
+# Source: https://www.riannek.de/2022/gpx-to-geopandas/
+import folium
+from folium.plugins import MeasureControl
+import os
+import branca.colormap as cm
+import json
+from geopandas import read_file, GeoDataFrame, GeoSeries
+from pandas import concat
+from folium.plugins import GroupedLayerControl
+from shapely.geometry import Polygon
+
+# Step 3: Define the style function
+def building_style(feature):
+    # Step 3a: Extract color (assuming your hex color code column is called 'color')
+    color = feature['properties'].get('colour', '#FFFFFF')  # Default to white if 'color' is missing
+    
+    # Step 3b: Return style settings
+    return {
+        'fillColor': color,
+        'color': "#505050",  # Border color, same as fill
+        'weight': 0.5,      # Border thickness
+        'fillOpacity': 1  # Fill opacity
+    }
+
+def add_popup(feature):
+    # Define the pop-up content (you can customize it here)
+    popup_content = f"Attribute Value: {feature['properties'].get('relhaxmax', 'N/A')}"
+    return folium.Popup(popup_content, max_width=300)
+
+# Load data
+canal = read_file("./data/shadows-test/canal-ac1_6.shp")
+shadows = read_file("./data/shadows-test/shadows-around-ac1_6-at-01_01-09_45_00.shp")
+buildings = read_file("./data/shadows-test/buildings-around-ac1_6.shp")
+
+# Dissolve shadows into one
+merged = shadows.dissolve()
+
+# Create colour ramp for buildings
+colour_ramp = cm.linear.viridis.scale(min(buildings.relhmax), max(buildings.relhmax))
+colour_ramp.caption = "Building height (m)"
+
+# Add colour column based on relative height max
+buildings['colour'] = [colour_ramp(x) for x in buildings['relhmax']]
+
+# Create map
+m = folium.Map(location=(53.472648,-2.241951), zoom_start=11, 
+                tiles="Cartodb Positron")
+
+# Add shadows
+folium.GeoJson(merged, style_function=lambda feature: {
+    "fillColor": "#6c6c6c",
+    "color":None,
+    "fillOpacity":0.6}, name="Shadow geometries (dissolved)",
+zoom_on_click=True, show=False).add_to(m)
+
+# Add buildings
+folium.GeoJson(buildings, style_function=building_style, name="Building geometries",
+popup=folium.GeoJsonPopup(fields=['relhmax'], labels=True), 
+zoom_on_click=True).add_to(m)
+
+# Add canals
+folium.GeoJson(canal, style_function=lambda feature: {
+"fillColor": "#72b4f9",
+"color": "#2b5d93"}, name="Canal geometry",
+zoom_on_click=True).add_to(m)
+
+
+# Add measurement control
+m.add_child(MeasureControl())
+
+# Fit to map content
+folium.FitOverlays().add_to(m)
+
+# Add colour ramp
+m.add_child(colour_ramp)
+
+# Add layer control
+folium.LayerControl().add_to(m)
+
+# Show map
+m
+```
+
+<br>
+
+For this location and datetime (and based on `pybdshadow` and its dependent packages), the solar **azimuth** (the angle between the sun's position and due north, measured clockwise) is 146.2°.
+
+The solar **angle** (or altitude, the angle between the horizon and centre of the sun, incorporating refraction) is 7.3°.
+
+> How does this compare to other sources? e.g., [SunCalc](https://www.suncalc.org/#/27.6936,-97.5195,3/2025.03.11/15:03/1/3). Note: you'll have to modify the location, date and time for comparison with the above.
+
+Based on those solar attributes, shadows are produced based on the input building geometries and heights.
+
+> How long are the shadows? Measure the shadow length for the most westerly building (the Ibis Hotel, Pollard Street). Its height (m) is included in the pop-up and via the colour scale, and you can measure the shadow length using the map tool. 
+
+We can verify this manually, as shadow length is quite easy to calculate using trigonometry:
+
+$$
+shadow_{length} = \frac{object_{height}}{tan(radians(angle))}
+$$
+
+> Utilise the above equation, using the object height and solar angle, to estimate the shadow length.
+
+> How does this length compare to [SunCalc](https://www.suncalc.org/#/27.6936,-97.5195,3/2025.03.11/15:03/1/3)? Again, make sure the location, date and time are correct, and include the building height (`relhmax`) in the 'at an object level [m]' input.
+
+There are other sources for modelling building-topographic shadows, for example [ShadeApp](https://shademap.app/@53.48025,-2.22222,16.00077z,1735724716321t,0b,0p,0m!1735719966854!1735747267074#)
+
+> The modelled shadows from ShadeApp can be exported as GeoTIFF and compared to those downloaded above. Are the shadows modelled by ShadeApp consistent with our outputs or do they differ? If the latter, why might this be? 
+
+## Even more?
+
+If you want to explore further, why not have a go at modelling shadows yourself using `pybdshadow`? 
+
+This can be run using building geometries from OpenStreetMap, for example obtained via [`OSMnx`](https://osmnx.readthedocs.io/en/stable/), or those made available above. 
+
+This will require an Anaconda install ([Windows](https://docs.anaconda.com/anaconda/install/windows/), [Mac](https://docs.anaconda.com/anaconda/install/mac-os/)), a [Python environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to work in, and installation of [`pybdshadow`](https://pybdshadow.readthedocs.io/en/latest/install.html). 
+
+Most of the above should be fairly straightforward for those of you who took Understanding GIS in Semester 1, but come speak to me if you need some guidance, or James and Jade @ GIS Technical.
+
+-- *Dr. Matt Tomkins*

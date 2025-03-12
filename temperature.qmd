@@ -2,9 +2,13 @@
 title: "Temperature"
 ---
 
-> Explore the effects of changing the air temperature (test).
+Another key input for the model is weather data, as discussed [here](model.qmd). 
 
-Interpretation: increasing air temperature, increases canal temperature (surface). Not particularly insightful! 
+Alongside wind speed (m/s), humidity (%), and cloud cover (%), the temperature of the air (°C) can play a key role in water energy balance, influencing the rate of evaporation and convection.
+
+With global surface temperature reaching 1.1°C above the 1850-1900 baseline in 2011-2020 (IPCC, [2024](https://www.ipcc.ch/report/ar6/syr/summary-for-policymakers/)) and projected to increase further under various emission scenarios, how will rising temperatures affect canals? 
+
+> Explore the plot below, which shows modelled water temperatures for the base model (0°C) and for models run with simulated higher temperatures (+1°C, +2°C, +3°C). How does this affect water temperature?
 
 ```{python}
 #| echo: false
@@ -62,11 +66,11 @@ fig.write_html("./images/temperature_effects.html")
 
 <iframe src="./images/temperature_effects.html" width="100%" height="600px"></iframe>
 
-> How has increasing the air temperature of the environment influenced the water temperature? 
+In the following plot, we can investigate the effects of the above changes on air temperatures, where the `y` axis shows the change in air temperature acorss the year for a single canal section (`rc_9`), aggregated weekly.
 
-In the daytime, most cooling during spring, less during summer
+> How has increasing the *input* air temperature (+1°C, +2°C, +3°C) influenced the modelled air temperature across the year? Increased or diminished cooling?
 
-The effect of increasing air temperature (on the effects of canals of air temperature) seems relatively small, but appears to decrease daytime cooling slightly.
+> What is the magnitude of the change? 
 
 ```{python}
 #| echo: false
@@ -135,10 +139,6 @@ fig.write_html("./images/air_temperature_effects.html")
 
 <iframe src="./images/air_temperature_effects.html" width="100%" height="600px"></iframe>
 
-When it comes to warming water, solar intensity plays a significantly greater role than air temperature, as the direct absorption of sunlight by the water surface is the primary driver of heat gain, while air temperature primarily affects heat transfer through convection, which is usually less impactful than the direct solar radiation absorption. (AI)
+Based on the above, [solar radiation](#weather-section) and the degree of shading appears to play a more significant role in changing water and air temperatures (e.g., Shinohara et al. [2021](https://doi.org/10.2166/nh.2021.148)) than *input* air temperature changes alone. 
 
-See https://doi.org/10.2166/nh.2021.148
-
-Ultimately, air temperature likely to have a small effect (convection).
-
-Not 100% sure on this... but whatever
+Within this context, the changing degree of shading (e.g., building construction) might be expected to have a more noticable impact on canal-air temperature effects, than future climate change. A hypothesis to be explored further...

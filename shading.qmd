@@ -2,13 +2,41 @@
 title: "Shading"
 ---
 
-To explore the effects of shading, let's look at one section of the Bridgewater Canal, Manchester.
+In the remainder of the practical, we will consider the **sensitivity** of the results to the choice of inputs. This is a key part of model evaluation - how do the results change as the inputs change?
 
-This is a relatively large canal, but with few buildings in the surrounding area (*Cornbrook*). As a former industrial area, there is development potential. 
+One key input for the model is the degree of **shading** of the canal by nearby buildings.
 
-![Bartholomew map of Cornbrook (1900). [Source](https://manchester.publicprofiler.org/beta/index.php)](images\bartholomew-1900-map.png)
+- What happens to the results if we *exclude* shading from the model?
+- What happens to the results if we *change* the degree of shading?
 
-Here is the canal today, and nearby building geometries.
+While these questions are important for model evaluation, they also have important consequences for the management, development and governance of urban areas. This is of  particular relevance for Manchester, which has a rapidly developing skyline (see [the Guardian](https://www.theguardian.com/artanddesign/2024/feb/18/manchester-skyline-skycrapers-high-rise-towers-poplin-is-up-the-only-way-viadux-gary-neville)):
+
+![Skyscraping Manchester, December 2023. Photograph: Bardhok Ndoji/Alamy](images\manchester-skyline.png){width=100%}
+
+The transformation of the skyline over the last 15 years is quite remarkable: 
+
+::: {#fig-elephants layout-ncol=2}
+
+![2008](./images/moseley-2008.png){#fig-2008}
+
+![2024](./images/moseley-2024.png){#fig-2024}
+
+The changing skyline at Lower Moseley Street
+:::
+
+With construction of new office and residential buildings on *brownfield* sites (previously developed for industrial or commercial purposes), and on sites close to the canal network, there is potential for increased shading of our waterways. How will this influence water temperature and the effects of the waterways on air temperature?
+
+<br>
+
+## An exploration
+
+To explore the effects of shading, we'll focus on one single section of the Bridgewater Canal (`bc_77`).
+
+This is a relatively large canal section, but there are few tall buildings in the surrounding area (*Cornbrook*) and as a result, minimal shading across the year. As a former industrial area, there is potential for new buildings and 'regeneration'. 
+
+![Bartholomew map of Cornbrook (1900). [Source](https://manchester.publicprofiler.org/beta/index.php)](images\bartholomew-1900-map.png){width=80%}
+
+> Inspect the canal and the nearby building geometries.
 
 ```{python}
 #| echo: false
@@ -87,9 +115,11 @@ m
 
 ```
 
-> Explore the effects of adding shading to water temperature (test).
+<br>
 
-Also run with rc_17, rc_9
+The plot below shows the modelled water temperature for `bc_77`, including the effects of shading.
+
+> Inspect the plot, which also includes the model with shading effects excluded (i.e., shading proportion = 0) and with full shading (i.e., shading proportion = 1). 
 
 ```{python}
 #| echo: false
@@ -134,9 +164,9 @@ fig = go.Figure()
 fig.add_trace(go.Scatter(x=dt_datetime, y=full_water, mode='lines', 
 line_color = "#3f9cff", opacity=0.75, visible='legendonly', name='Full shading'))
 fig.add_trace(go.Scatter(x=dt_datetime, y=including_water, mode='lines', 
-line_color = "#707070", opacity=0.75, visible='legendonly', name='Including shading'))
+line_color = "#707070", opacity=0.75, name='Including shading'))
 fig.add_trace(go.Scatter(x=dt_datetime, y=excluding_water, mode='lines', 
-line_color = "#FFB16F", opacity=0.75, name='Excluding shading'))
+line_color = "#FFB16F", opacity=0.75, visible='legendonly', name='Excluding shading'))
 
 # Axis labels
 fig.update_layout(
@@ -154,17 +184,21 @@ fig.write_html("./images/shading_water_temperature.html")
 
 <iframe src="./images/shading_water_temperature.html" width="100%" height="600px"></iframe>
 
-> How has adding shading to the environment influenced the water temperature? 
+> How important is the current degree of shading by buildings in understanding change in water temperature through time? 
 
-Here we have the net change in air temperature, associated with water only (reference material excluded).
+> How does water temperature change if the canal is fully shaded? When is this most important?
 
-0 is the unshaded model
+## Air temperature 
 
-Then we add the actual shading for bc_277 (minimal effect)
+The above plot shows that water temperatures *are* influenced by the degree of shading, but how does this influence the effects of waterways on air temperatures?
 
-We also re-run using the shading parameters for a nearby canal section on the Rochdale Canal (rc_9), which is a proxy for the shading that could occur if this area was extensively developed
+This is illustrated in the plot below, where the 0 line (`y` axis) represents the modelled effects on air temperature when shading effects are *excluded*. This can then be compared to:
 
-We also run with the (unrealistic) full shading (canal entirely shaded)
+- a model incorproating the true shading of `bc_77` [*including_shading*]
+- a model incorproating full shading (shading proportion = 1) [*full_shading*]
+- a model where the shading proportion is based on a nearby section of the Rochdale Canal (`rc_9`) [*developed_shading*]. This is closer to the city centre and is highly shaded by nearby buildings, so is used here as a proxy for the shading that *could* occur if this area was extensively developed. 
+
+**Note**: model results are presented *relative* to the the model excluding shading, where negative values denote relative cooling, and positive values denote relative warming.
 
 ```{python}
 #| echo: false
@@ -248,3 +282,7 @@ fig.write_html("./images/shading_effects.html")
 ```
 
 <iframe src="./images/shading_effects.html" width="100%" height="600px"></iframe>
+
+> How does adding shading (true / full / potential) influence the effect of the canal on air temperatures? 
+
+> What is the magnitude of the potential change? 

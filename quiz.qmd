@@ -2,9 +2,7 @@
 title: "Quiz"
 ---
 
-## General Knowledge Quiz
-
-<p>Answer the following questions:</p>
+<p>To test your understanding of the material, answer the following questions (formative):</p>
 
 <div id="quiz-container">
 
@@ -73,16 +71,4 @@ title: "Quiz"
     }
   }
 </script>
-
-## A little bit more? 
-
-If you've been through the practical and want to explore some of this further, one thing we might to reflect on is the accuracy of our shading calculations. In our model, we use an existing package called [pybdshadow](https://pybdshadow.readthedocs.io/en/latest/index.html), designed specifically for generating building shadows, and base our calculations based on building geometries (footprints, heights) from the Ordnance Survey [MasterMap Topography layer](https://www.ordnancesurvey.co.uk/products/os-mastermap-topography-layer). 
-
-To illustrate the typical outputs, you can download the canal geometry for one feature of the Ashton Canal (`ac1_6`), the nearby building geometries, and the shadows produced at a specific datetime (`2022-01-01 09:45:00`). [Note: shadows are only produced for buildings in the solar direction, for computational ease]
-
-
-
-Here's the ShadeApp output: https://shademap.app/@53.48025,-2.22222,16.00077z,1735724716321t,0b,0p,0m!1735719966854!1735747267074#
-Here's the suncalc output: https://www.suncalc.org/#/53.4794,-2.2221,17/2022.01.01/09:45/27.5/3
-
 
