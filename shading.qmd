@@ -45,17 +45,42 @@ This is a relatively large canal section, but there are few tall buildings in th
 import folium
 import os
 import json
+import branca.colormap as cm
 from geopandas import read_file, GeoDataFrame
 from pandas import concat
 from folium.plugins import GroupedLayerControl
+
+# Step 3: Define the style function
+def building_style(feature):
+    # Step 3a: Extract color (assuming your hex color code column is called 'color')
+    color = feature['properties'].get('colour', '#FFFFFF')  # Default to white if 'color' is missing
+    
+    # Step 3b: Return style settings
+    return {
+        'fillColor': color,
+        'color': "#505050",  # Border color, same as fill
+        'weight': 0.5,      # Border thickness
+        'fillOpacity': 1  # Fill opacity
+    }
+
+def add_popup(feature):
+    # Define the pop-up content (you can customize it here)
+    popup_content = f"Attribute Value: {feature['properties'].get('relhaxmax', 'N/A')}"
+    return folium.Popup(popup_content, max_width=300)
 
 # Load canals data
 with open('./data/manchester-canals-4326.geojson', 'r') as f:
     data = json.load(f)
 
-# Load buildings data
-with open('./data/manchester-buildings-4326.geojson', 'r') as f:
-    buildings = json.load(f)
+# Read buildings data
+buildings = read_file('./data/bc_77-buildings-4326.shp')
+
+# Create colour ramp for buildings
+colour_ramp = cm.linear.viridis.scale(min(buildings.relhmax), max(buildings.relhmax))
+colour_ramp.caption = "Building height (m)"
+
+# Add colour column based on relative height max
+buildings['colour'] = [colour_ramp(x) for x in buildings['relhmax']]
 
 # Extract data and init dict
 #canals = data['features']
@@ -95,10 +120,8 @@ zoom_on_click=True).add_to(m)
 folium.FitOverlays().add_to(m)
 
 # Add buildings
-folium.GeoJson(buildings, style_function=lambda feature: {
-"fillColor": "#b6b6b6",
-"color": "#505050",
-"weight": 1}, name=f"Buildings",
+folium.GeoJson(buildings, style_function=building_style, name="Building geometries",
+popup=folium.GeoJsonPopup(fields=['relhmax'], labels=True), 
 zoom_on_click=True).add_to(m)
 
 # Add other canals
@@ -184,7 +207,7 @@ fig.write_html("./images/shading_water_temperature.html")
 
 <iframe src="./images/shading_water_temperature.html" width="100%" height="600px"></iframe>
 
-> How important is the current degree of shading by buildings in understanding change in water temperature through time? 
+> To what extent is the current degree of shading an important control on water temperature?
 
 > How does water temperature change if the canal is fully shaded? When is this most important?
 

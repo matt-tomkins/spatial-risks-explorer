@@ -60,6 +60,10 @@ canal = read_file("./data/shadows-test/canal-ac1_6.shp")
 shadows = read_file("./data/shadows-test/shadows-around-ac1_6-at-01_01-09_45_00.shp")
 buildings = read_file("./data/shadows-test/buildings-around-ac1_6.shp")
 
+# Ibis hotel
+lat = 53.479487029646634
+lon = -2.2219683012482205
+
 # Dissolve shadows into one
 merged = shadows.dissolve()
 
@@ -92,6 +96,12 @@ folium.GeoJson(canal, style_function=lambda feature: {
 "color": "#2b5d93"}, name="Canal geometry",
 zoom_on_click=True).add_to(m)
 
+# Add marker
+folium.Marker(
+    location=[lat, lon],
+    popup="Ibis Hotel, Pollard Street",
+    icon=folium.Icon(color="red"),
+).add_to(m)
 
 # Add measurement control
 m.add_child(MeasureControl())

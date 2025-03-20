@@ -70,7 +70,9 @@ fig.write_html("./images/measured_air_modelled_water_temperature.html")
 
 ## Effects on air temperature 
 
-While modelling changing water temperature is interesting, our main focus is modelling the effects of changing water temperature (and energy storage) on the surrouding air temperature i.e., are canals cooling, warming or having no effect?
+While modelling changing water temperature is interesting, our main focus is modelling the effects of changing water temperature (and energy storage) *on* the surrounding air temperature i.e., are canals cooling, warming or having no effect?  
+
+### Day
 
 Included below is a plot of the effects of canals in Manchester on air temperatures during the **daytime** for the entirety of 2022 (`x`). The `y` axis shows the effect on air temperature, where negative values denote cooling of the air, and positive values denote warming of the air. Note: these values are relative to the reference material (concrete) as discussed previously.
 
@@ -192,6 +194,10 @@ During the summer, there were also extreme heatwaves on 15–17 June, 17–19 Ju
 
 > Is there any of evidence of these heatwaves in the above plots? What does this do to the effects of canals on air temperature?
 
+Overall, and as an average across the year, Manchester's canals are affecting daytime temperatures by $-0.686$°C (*p*25 = $-0.926$°C, *p*75 = $-0.461$°C). *Note*: this is not for the city as a whole, but for area surrounding the canals, which we'll discuss [later](area.qmd).
+
+### Night
+
 While daytime effects are important, **nighttime** effects also need to be considered, for example due to the impacts of nighttime heat stress on human health (e.g., Sarangi et al. [2021](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2021GL095678))
 
 > Inspect the plot below, which showcases nighttime effects. 
@@ -304,12 +310,16 @@ fig.write_html("./images/seasonal_effects_night.html")
 
 <iframe src="./images/seasonal_effects_night.html" width="100%" height="400px"></iframe>
 
+Overall, and as an average across the year, Manchester's canals are affecting nighttime temperatures by $0.385$°C (*p*25 = $0.271$°C, *p*75 = $0.613$°C)
+
 ## Summary
 
 Before moving on to the next section, ensure you have reflected on:
 
-> The effects of canals on air temperatures during the day and night
+> The effects of canals on air temperatures during the day and night.
 
-> How these effects vary seasonally
+> How these effects vary seasonally.
+
+> How these effects compare to those reported in published literature e.g., Volker et al. ([2013](https://www.jstor.org/stable/23595377)), Hathway, and Sharples ([2012](https://doi.org/10.1016/j.buildenv.2012.06.013)), Jacobs et al. ([2020](https://doi.org/10.1016/j.uclim.2020.100607)).
 
 

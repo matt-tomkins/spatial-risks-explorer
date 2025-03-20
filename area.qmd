@@ -109,7 +109,12 @@ However, because of differing shape complexity, using a standard buffer e.g., [`
 
 For `mbabc_8`, the buffer area is approximately `{python} mbabc_ratio`× larger than the canal, but only `{python} bc_ratio`× for `bc_83`. 
 
-For most spatial queries, shape complexity isn't an important issue. In our case though, this is a problem because the magnitude of the temperature effect is partly dependent on the size of the area we are modelling for i.e., the same energy flux averaged over a larger area = a smaller temperature effect, whereas averaged over a smaller area = a larger temperature effect. 
+For most spatial queries, shape complexity isn't an important issue. In our case though, this is a problem because the magnitude of the temperature effect is partly dependent on the size of the area we are modelling for i.e., the same energy flux averaged over a larger area = a smaller temperature effect, whereas averaged over a smaller area = a larger temperature effect. This is an issue we discussed in the lecture:
+
+> "The location of the reference site compared to the urban blue site strongly influences the effect size of urban blue space found by the meta analysis.""
+>
+> -- <cite>Völker et al. ([2013](https://www.jstor.org/stable/23595377))
+</cite>
 
 The underlying principle is that if `bc_83` and `mbabc_8` were identical in water temperature and energy storage, then they should have an identical effect on the surrounding environment in our non-spatial model. Using a standard buffer would not produce this behaviour, as we would be modelling different size areas (`{python} mbabc_ratio`× vs. `{python} bc_ratio`×)! 
 
@@ -125,7 +130,7 @@ The advantage of this approach is that the buffered area increases linearly with
 
 Using this approach, we can then start to investigate how changing the area of the canal influences the magnitude of the temperature effect. 
 
-Again, we will use a single canal as an example (`rc_9` on the Rochdale Canal), re-running the model with different areas (×0.5, ×1.5, ×2.0, ×3.0). This produces the following results, which are the median daytime temperature effect across the year (*p*25, *p*75): 
+Again, we will use a single canal as an example (`rc_9` on the Rochdale Canal), re-running the model with different areas (×0.5, ×1.5, ×2.0, ×3.0). This produces the following results, which are the median daytime temperature effects across the year (*p*25, *p*75): 
 
 ```{python}
 #| echo: false

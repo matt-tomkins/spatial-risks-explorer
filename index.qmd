@@ -77,7 +77,7 @@ To finish, there is a short formative [quiz](quiz.qmd) to test your knowledge as
 
 > To begin, explore Manchester's canal network, and the nearby building geometries, which are one of the important model inputs. 
 
-> How far do you live from the nearest canal?
+> How far do you live from the nearest canal? Would it be considered "accessible", based on the commonly used [1 km or 15-minute walking distance](https://designatedsites.naturalengland.org.uk/GreenInfrastructure/downloads/Green%20Infrastructure%20Standards%20for%20England%20Summary%20v1.1.pdf) threshold?
 
 ```{python}
 #| echo: false

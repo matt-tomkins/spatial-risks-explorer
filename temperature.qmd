@@ -6,7 +6,7 @@ Another key input for the model is weather data, as discussed [here](model.qmd).
 
 Alongside wind speed (m/s), humidity (%), and cloud cover (%), the temperature of the air (°C) can play a key role in water energy balance, influencing the rate of evaporation and convection.
 
-With global surface temperature reaching 1.1°C above the 1850-1900 baseline in 2011-2020 (IPCC, [2024](https://www.ipcc.ch/report/ar6/syr/summary-for-policymakers/)) and projected to increase further under various emission scenarios, how will rising temperatures affect canals? 
+With global surface temperatures reaching 1.1°C above the 1850-1900 baseline in 2011-2020 (IPCC, [2024](https://www.ipcc.ch/report/ar6/syr/summary-for-policymakers/)) and projected to increase further under various emission scenarios, how will rising temperatures affect canals? 
 
 > Explore the plot below, which shows modelled water temperatures for the base model (0°C) and for models run with simulated higher temperatures (+1°C, +2°C, +3°C). How does this affect water temperature?
 

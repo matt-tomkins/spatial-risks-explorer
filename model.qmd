@@ -10,7 +10,7 @@ Although we are not running the model today, it is important to understand the d
 
 The model is run on the urban canal network, which is extracted from the Ordnance Survey [MasterMap Topography layer](https://www.ordnancesurvey.co.uk/products/os-mastermap-topography-layer). Waterways were extracted and filtered to urban areas, and the key attributes used in the model are:
 
-- the area of each *continguous* canal section e.g., separated by locks or bridges. 
+- the area of each *contiguous* canal section e.g., separated by locks or bridges. 
 - the depth of each section, based on published canal [draughts](https://canalrivertrust.org.uk/boating/go-boating/planning-your-boat-route/waterway-dimensions#maximum-craft-dimensions) i.e., the  vertical distance between the waterline and the lowest part of the hull, a minimum required water depth for safe navigation.
 
 > Can you think of any issues with these attributes?
@@ -29,7 +29,7 @@ For example, here is an output for a feature of the Worcester and Birmingham can
 
 > What characteristics of the environment are missing from the model?
 
-### Weather and radiation {weather}
+### Weather and radiation
 
 To predict the effects of the canals on surrounding air temperature, the analysis first models changing water temperature and energy storage through time. This is based on weather parameters from [OpenWeather](https://openweathermap.org/), including:
 
@@ -101,7 +101,7 @@ fig.write_html("./images/climate-example.html")
 
 > Have a look at the data provided by [OpenWeather](https://openweathermap.org/history-bulk). Can you think of any limitations with this data source? 
 
-Incoming solar radiation (W/m^2^) is also modelled for each time step, based on the canal location, solar altitude, and cloud cover. Below is an example of the solar radiation values for central Manchester (53.477, -2.244; excluding cloud cover) for a 10-day period from 2022-06-01:
+Incoming solar radiation (W/m^2^) is also modelled for each time step, based on the canal location, solar altitude, and cloud cover. Below is an example of the solar radiation values for central Manchester (Lat 53.477°, Lon -2.244°; excluding cloud cover) for a 10-day period from 2022-06-01:
 
 ```{python}
 #| echo: false
@@ -166,15 +166,23 @@ fig.write_html("./images/solar-radiation-example.html")
 
 ## Approach
 
-Based on the above inputs, water temperatures are modelled incorporating evaporative, sensible (conductive and convective) and radiative (sunlight and thermal) heat fluxes between the water and the outside environment. Some heat fluxes that *aren't* included are heat flux due to friction ($Q_{fc}$) or the advective heat flux ($Q_a$), which you can read about in Webb and Zhang ([1997](https://doi.org/10.1002/(SICI)1099-1085(199701)11:1%3C79::AID-HYP404%3E3.0.CO;2-N)).
+Based on the above inputs, water temperatures are modelled incorporating a range of fluxes between the water and the outside environment, including:
 
-> Why have these heat fluxes been excluded from the model?
+- **latent** i.e., energy absorbed or released during a phase change, such as evaporation (liquid to gas).
+- **sensible** i.e., heat transfer within one material or between materials in direct contact (conduction) or heat transfer through fluid movement (convection).
+- **radiative** i.e., heat fluxes associated with incoming shortwave radiation (sunlight) and outgoing longwave radiation (thermal).
+
+If you're interested in energy balance modelling, you can read more in Webb and Zhang ([1997](https://doi.org/10.1002/(SICI)1099-1085(199701)11:1%3C79::AID-HYP404%3E3.0.CO;2-N)) and Grimmond et al. ([2010](https://doi.org/10.1175/2010JAMC2354.1)).
+
+Some heat fluxes that *aren't* included are heat flux due to friction ($Q_{fc}$) or the advective heat flux ($Q_a$), which are also discussed in Webb and Zhang ([1997](https://doi.org/10.1002/(SICI)1099-1085(199701)11:1%3C79::AID-HYP404%3E3.0.CO;2-N)). 
+
+> Why have these heat fluxes been excluded from our model?
 
 To model these fluxes, the water column is split into different layers and at each time step, fluxes of energy are modelled between each layer and between the water surface and the surrounding environment. This is quite complicated. 
 
 ![Schematic of the model structure](images/model-schematic.png){width=80%}
 
-To complicate matters further, modelling of water (and its effects) is only one part of the model, which also considers the temperature and energy storage of a **reference** surface. 
+To complicate matters further, modelling of water (and its effects) is only one part of the model, which also considers the temperature and energy storage of a **reference** surface or site, which we covered in the lecture. 
 
 This is necessary because we need a baseline for comparison. The canal might have an effect on the surrounding air temperature (i.e., cooling or warming by *x*°C), but how do we assess the significance of this effect without comparing it to other materials e.g., concrete, asphalt, greenspace?
 
@@ -433,3 +441,234 @@ fig.write_html("./images/model_residual.html")
 Using the above data, we can calculate some simple summary statistics, such as the mean absolute residual ($abs(modelled-measured)$) which is `{python} med`, with *p*25 of `{python} p25` and *p*75 of `{python} p75`.  
 
 > What factors might account for under- or over-prediction of water temperature? Consider the inputs, model assumptions... 
+
+
+## Validation - another example
+
+The monitoring station on the Liverpool and Leeds Canal (feature `lalc_73`) is just one of a small number of monitoring stations operated by the CRT.
+
+Here is another (`cc3_11`) on the Coventry Canal, Tamworth, shown here:
+
+```{python}
+#| echo: false
+
+# Source: https://www.riannek.de/2022/gpx-to-geopandas/
+import folium
+import os
+import json
+from geopandas import read_file, GeoDataFrame
+from pandas import concat
+from folium.plugins import GroupedLayerControl
+
+# Load canals data
+with open('./data/cc3-canals-4326.geojson', 'r') as f:
+    data = json.load(f)
+
+# Load buildings data
+with open('./data/cc3-buildings-4326.geojson', 'r') as f:
+    buildings = json.load(f)
+
+# Extract data and init dict
+#canals = data['features']
+#buildings = b['features']
+
+# Canal name
+id = "cc3_11"
+
+# Monitoring station
+lat = 52.628742
+lon = -1.679184
+
+extract = data['features']
+
+# Filter based on canal names
+filtered = [geo for geo in extract if geo['properties']['code_id'] == id]
+excluded = [geo for geo in extract if geo['properties']['code_id'] != id]
+
+# Convert to GeoJSON feature collection format
+filtered_dict = {
+    "type": "FeatureCollection",
+    "name": id,
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": filtered}
+excluded_dict = {
+    "type": "FeatureCollection",
+    "name": f"not-{id}",
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": excluded}
+
+# Create map
+m = folium.Map(location=(53.472648,-2.241951), zoom_start=11, 
+                tiles="Cartodb Positron")
+
+# Add canals
+folium.GeoJson(filtered_dict, style_function=lambda feature: {
+"fillColor": "#72b4f9",
+"color": "#2b5d93"}, name="Canals",
+zoom_on_click=True).add_to(m)
+
+# Add buildings
+folium.GeoJson(buildings, style_function=lambda feature: {
+"fillColor": "#b6b6b6",
+"color": "#505050",
+"weight": 1}, name=f"Buildings",
+zoom_on_click=True).add_to(m)
+
+# Add marker
+folium.Marker(
+    location=[lat, lon],
+    popup="Bridge 73 Anchor Bridge",
+    icon=folium.Icon(color="green"),
+).add_to(m)
+
+# Fit to map content
+folium.FitOverlays().add_to(m)
+
+# Add other canals
+folium.GeoJson(excluded_dict, style_function=lambda feature: {
+    "fillColor": "#d6e7f9",
+    "color": "#85add6"}, name="Neighbouring canals",
+    zoom_on_click=True).add_to(m)
+
+# Add layer control
+folium.LayerControl().add_to(m)
+
+# Show map
+m
+
+```
+
+<br>
+
+Here are the plots of the measured and modelled water temperatures and residuals ($modelled - measured$) for `cc3_11`:
+
+```{python}
+#| echo: false
+#| warning: false
+
+import json
+from datetime import datetime
+import plotly.graph_objects as go
+import plotly.io as pio
+from plotly.subplots import make_subplots
+from pandas import read_csv
+from numpy import quantile
+from statistics import median
+
+# Dictionary of CRT wT monitoring locations and corresponding canal ids
+location_dict = {'tamc_19' : 'Anderton Waste Weir Flow Water Temperature C (All Data) (Value)', 
+                    'lalc_73' : 'Bridge Pagefield Pipe Crossing Mean Temperature C (All Data) (Value)',
+                    'nabc_2' : 'Bridge 15 Chain Lane Bridge Mean Temperature C (All Data) (Value)',
+                    'suc_41' : 'New Road Bridge 148 Mean Temperature C (All Data) (Value)',
+                    'rc_103' : 'Bridge 46 Benthouse Bridge Mean Temperature C (All Data) (Value)',
+                    'cc3_60' : 'Hawkesbury Lock Mean Temperature C (All Data) (Value)',
+                    'batc_14' : 'Bridge 32. Priorswood Mean Temperature C (All Data) (Value)', 
+                    'hc_53' : 'Bridge 4 Wakefield Road Bridge Mean Temperature C (All Data) (Value)',
+                    'lalc_4' : 'Bridge C Lightbody Street Mean Temperature C (All Data) (Value)',
+                    'cc3_11' : 'Bridge 73 Anchor Bridge Mean Temperature C (All Data) (Value)',
+                    'cc3_53' : 'Bridge 40 Taverners Bridge Mean Temperature C (All Data) (Value)'}
+
+# Canal ID for validation
+canal_id = "cc3_11"
+
+# Load modelled data
+with open(f'./data/model-output-{canal_id}.json', 'r') as f:
+    modelled_data = json.load(f)
+
+# Load measured data
+measured_data = read_csv(f"./data/model_validation_{canal_id}.csv")
+
+# Return value, corresponding to selected id
+location = location_dict[canal_id]
+
+# Extract measured temperatures and datetimes
+measured_water = measured_data[['dt', location]]
+measured_water = measured_water.dropna()
+
+# Convert from string to datetime
+dt = [datetime.strptime(x, '%d/%m/%Y %H:%M') for x in measured_water['dt']]
+
+# Convert to unix 
+dt_unix = [str(int(x.timestamp())) for x in dt]
+
+# Measured dictionary
+measured_dict = dict(zip(dt_unix, measured_water[location]))
+
+# Extract lists of values to plot, converting to celcius
+modelled_water = [x[f'depth_water_{40}'] - 273.15 for x in modelled_data.values()]
+
+# Init dictionary to store residuals
+residual_dict = {}
+
+# Iterate through the modelled unix times
+for key, value in modelled_data.items():
+
+    # If this unix time exists in the measured dictionaru
+    if key in measured_dict:
+        
+        try: 
+
+            # Calculate the residual, converting from K to celcius
+            res = (value[f'depth_water_{40}'] - 273.15) - measured_dict[key]
+
+        # EAFP: surface layer
+        except KeyError:
+
+            # Calculate the residual, converting from K to celcius
+            res = (value[f'surface_water_k'] - 273.15) - measured_dict[key]
+
+        # Add to residual dictionary
+        residual_dict[key] = res
+
+# Extract datetimes and values
+residual_dt = list(residual_dict.keys())
+residual_datetime = [datetime.utcfromtimestamp(int(x)) for x in residual_dt]
+residual_temp = [x for x in residual_dict.values()]
+
+# Absolute
+abs_residual = [abs(x) for x in residual_temp]
+med = f"{median(abs_residual):.2f}°C"
+p25 = f"{quantile(abs_residual, 0.25).item():.2f}°C"
+p75 = f"{quantile(abs_residual, 0.75).item():.2f}°C"
+
+# List of dict keys (unix), convert to datetime format
+modelled_dt = list(modelled_data.keys())
+modelled_datetime = [datetime.utcfromtimestamp(int(x)) for x in modelled_dt]
+
+# Create figure
+#fig = go.Figure()
+fig = make_subplots(rows=2, cols=1, row_heights=[0.7, 0.3],shared_xaxes=True,
+vertical_spacing = 0.05) 
+
+# Add trends to top row
+fig.add_trace(go.Scatter(x=modelled_datetime, y=modelled_water, mode='lines', 
+line_color = "#FFB16F", opacity=0.75, name='Modelled water'), row=1, col=1)
+fig.add_trace(go.Scatter(x=dt, y=measured_water[location], mode='lines', 
+line_color = "#707070", opacity=0.75, name='Measured water'), row=1, col=1)
+
+# Add residuals to bottom row
+fig.add_trace(go.Scatter(x=residual_datetime, y=residual_temp, mode='lines', 
+line_color = "#FFB16F", opacity=0.75, name='Residual', showlegend=False), row=2, col=1)
+
+# Y labels
+fig.update_yaxes(title_text="Temperature (°C)", row=1, col=1)
+fig.update_yaxes(title_text="Residual (°C)", row=2, col=1)
+
+# X labels
+fig.update_xaxes(title_text="Date", row=2, col=1)
+
+# Axis labels
+fig.update_layout(
+    legend_title="Legend",
+    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
+
+
+# Save the figure as an HTML file
+fig.write_html(f"./images/model_validation_residuals_{canal_id}.html")
+
+```
+
+
+<iframe src="./images/model_validation_residuals_cc3_11.html" width="100%" height="500px"></iframe>
+
+> How does the model perform at this location? Does performance differ from `lalc_73`?

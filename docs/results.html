@@ -67,6 +67,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -167,7 +196,9 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="effects-on-air-temperature" class="level2">
 <h2 class="anchored" data-anchor-id="effects-on-air-temperature">Effects on air temperature</h2>
-<p>While modelling changing water temperature is interesting, our main focus is modelling the effects of changing water temperature (and energy storage) on the surrouding air temperature i.e., are canals cooling, warming or having no effect?</p>
+<p>While modelling changing water temperature is interesting, our main focus is modelling the effects of changing water temperature (and energy storage) <em>on</em> the surrounding air temperature i.e., are canals cooling, warming or having no effect?</p>
+<section id="day" class="level3">
+<h3 class="anchored" data-anchor-id="day">Day</h3>
 <p>Included below is a plot of the effects of canals in Manchester on air temperatures during the <strong>daytime</strong> for the entirety of 2022 (<code>x</code>). The <code>y</code> axis shows the effect on air temperature, where negative values denote cooling of the air, and positive values denote warming of the air. Note: these values are relative to the reference material (concrete) as discussed previously.</p>
 <blockquote class="blockquote">
 <p>Inspect the results, which show the median, <em>p</em>25, and <em>p</em>75 values. These can be aggregated by month, fortnight and week.</p>
@@ -186,6 +217,10 @@ ul.task-list li input[type="checkbox"] {
 <blockquote class="blockquote">
 <p>Is there any of evidence of these heatwaves in the above plots? What does this do to the effects of canals on air temperature?</p>
 </blockquote>
+<p>Overall, and as an average across the year, Manchester’s canals are affecting daytime temperatures by <span class="math inline">\(-0.686\)</span>°C (<em>p</em>25 = <span class="math inline">\(-0.926\)</span>°C, <em>p</em>75 = <span class="math inline">\(-0.461\)</span>°C). <em>Note</em>: this is not for the city as a whole, but for area surrounding the canals, which we’ll discuss <a href="./area.html">later</a>.</p>
+</section>
+<section id="night" class="level3">
+<h3 class="anchored" data-anchor-id="night">Night</h3>
 <p>While daytime effects are important, <strong>nighttime</strong> effects also need to be considered, for example due to the impacts of nighttime heat stress on human health (e.g., Sarangi et al.&nbsp;<a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2021GL095678">2021</a>)</p>
 <blockquote class="blockquote">
 <p>Inspect the plot below, which showcases nighttime effects.</p>
@@ -198,15 +233,20 @@ ul.task-list li input[type="checkbox"] {
 </blockquote>
 <iframe src="./images/seasonal_effects_night.html" width="100%" height="400px">
 </iframe>
+<p>Overall, and as an average across the year, Manchester’s canals are affecting nighttime temperatures by <span class="math inline">\(0.385\)</span>°C (<em>p</em>25 = <span class="math inline">\(0.271\)</span>°C, <em>p</em>75 = <span class="math inline">\(0.613\)</span>°C)</p>
+</section>
 </section>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
 <p>Before moving on to the next section, ensure you have reflected on:</p>
 <blockquote class="blockquote">
-<p>The effects of canals on air temperatures during the day and night</p>
+<p>The effects of canals on air temperatures during the day and night.</p>
 </blockquote>
 <blockquote class="blockquote">
-<p>How these effects vary seasonally</p>
+<p>How these effects vary seasonally.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>How these effects compare to those reported in published literature e.g., Volker et al.&nbsp;(<a href="https://www.jstor.org/stable/23595377">2013</a>), Hathway, and Sharples (<a href="https://doi.org/10.1016/j.buildenv.2012.06.013">2012</a>), Jacobs et al.&nbsp;(<a href="https://doi.org/10.1016/j.uclim.2020.100607">2020</a>).</p>
 </blockquote>
 
 

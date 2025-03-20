@@ -2,12 +2,53 @@
 title: "Quiz"
 ---
 
+## Summary
+
+In the **lecture**, we:
+
+- considered the broader context for studying bluespaces, including changing climate, urban heat island, and the consequences of both for population health,
+
+- defined green- and blue-spaces and -infrastructure,
+
+- evaluated key methods used to study the effects of bluespaces on urban temperatures (in-situ measurement, remote sensing, modelling), 
+
+- **critically** engaged with the uncertainties associated with those methods (e.g., scale, choice of reference site, generalisation). 
+
+![Green-Blue Infrastructure (GBI), adapted from Kirkby and Scott ([2023](https://www.cape.ac.uk/wp-content/uploads/2023/05/GBI-Rapid-Evidence-Assessment.pdf))](images\GBI.png)
+
+In the **practical**, you have now engaged with one of those methods (modelling), focusing on the effects of Manchester's canals. 
+
+Some points for you to reflect on, based on the lecture, the practical content, and your wider reading (see below):
+
+> Based on your interpretation of the results, how effective are Manchester's bluespaces at promoting urban cooling?
+
+> Based on your reading and the analysis in Week 8, how does this compare to the effects of urban greenspaces? 
+
+> Is the distinction between green-blue *space* and *infrastructure* an important one? 
+
+> From a practical perspective, how might this analysis inform descision making in Manchester? 
+
+> What future work is needed in this field, considering the uncertainties associated with the methods used to study bluespaces?
+
+Overall, a key aim for both the lecture and the practical is to encourage you to be **critical** when considering the benefits and drawbacks of green-bluespaces and when considering the way in which they are evaluated.
+
+::: {#fig-canals layout-ncol=2 layout-valign="bottom"}
+
+![Dudley, Worcestershire (1835) -- Joseph Mallord William Turner (1775–1851)](images\dudley-canal.jpg)
+
+![Industrial Landscape: The Canal (1945) -- Laurence Stephen Lowry (1887–1976)](images\industrial-landscape-the-canal.jpg)
+
+Canals in art
+:::
+
+## Quiz
+
 <p>To test your understanding of the material, answer the following questions (formative):</p>
 
 <div id="quiz-container">
 
   <!-- Question 1 -->
-  <p>1. What effect do canals have on daytime temperatures?</p>
+  <p>1. What effect (according to the model!) do canals have on daytime temperatures?</p>
   <button onclick="checkAnswer('Cooling', 'correct', 1)">Cooling</button>
   <button onclick="checkAnswer('No effect', 'incorrect', 1)">No effect</button>
   <button onclick="checkAnswer('Warming', 'incorrect', 1)">Warming</button>
@@ -72,3 +113,14 @@ title: "Quiz"
   }
 </script>
 
+## Recommended reading
+
+- Gunawardena, K.R., Wells, M.J. and Kershaw, T., [2017](https://doi.org/10.1016/j.scitotenv.2017.01.158). Utilising green and bluespace to mitigate urban heat island intensity. Science of the total environment, 584, pp.1040-1055.
+
+- Hathway, E.A. and Sharples, S., [2012](https://doi.org/10.1016/j.buildenv.2012.06.013). The interaction of rivers and urban form in mitigating the Urban Heat Island effect: A UK case study. Building and environment, 58, pp.14-22.
+
+- Jacobs, C., Klok, L., Bruse, M., Cortesão, J., Lenzholzer, S. and Kluck, J., [2020](https://doi.org/10.1016/j.uclim.2020.100607). Are urban water bodies really cooling?. Urban Climate, 32, p.100607.
+
+- Veerkamp, C.J., Schipper, A.M., Hedlund, K., Lazarova, T., Nordin, A. and Hanson, H.I., [2021](https://doi.org/10.1016/j.ecoser.2021.101367). A review of studies assessing ecosystem services provided by urban green and blue infrastructure. Ecosystem Services, 52, p.101367.
+
+- Völker, S., Baumeister, H., Claßen, T., Hornberg, C. and Kistemann, T., [2013](https://www.jstor.org/stable/23595377). Evidence for the temperature-mitigating capacity of urban blue space—A health geographic perspective. Erdkunde, pp.355-371.
