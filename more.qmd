@@ -153,6 +153,6 @@ This can be run using building geometries from OpenStreetMap, for example obtain
 
 This will require an Anaconda install ([Windows](https://docs.anaconda.com/anaconda/install/windows/), [Mac](https://docs.anaconda.com/anaconda/install/mac-os/)), a [Python environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to work in, and installation of [`pybdshadow`](https://pybdshadow.readthedocs.io/en/latest/install.html). 
 
-Most of the above should be fairly straightforward for those of you who took Understanding GIS in Semester 1, but come speak to me if you need some guidance, or James and Jade @ GIS Technical.
+Most of the above should be fairly straightforward for those of you who took Understanding GIS in Semester 1, but come speak to me if you need some guidance, or @ GIS Technical.
 
 -- *Dr. Matt Tomkins*
