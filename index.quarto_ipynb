@@ -88,7 +88,7 @@
         "\n",
         "> How far do you live from the nearest canal? Would it be considered \"accessible\", based on the commonly used [1 km or 15-minute walking distance](https://designatedsites.naturalengland.org.uk/GreenInfrastructure/downloads/Green%20Infrastructure%20Standards%20for%20England%20Summary%20v1.1.pdf) threshold?\n"
       ],
-      "id": "5692440c"
+      "id": "4f1147e7"
     },
     {
       "cell_type": "code",
@@ -185,7 +185,7 @@
         "# Show map\n",
         "m"
       ],
-      "id": "ec21d386",
+      "id": "cf89fc5c",
       "execution_count": null,
       "outputs": []
     }
